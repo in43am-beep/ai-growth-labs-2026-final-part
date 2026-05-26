@@ -15,30 +15,26 @@
   const style = document.createElement('style');
   style.textContent = `
     .voice-call-btn {
-      position: fixed;
-      bottom: 90px;
-      right: 28px;
-      z-index: 10000;
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background: linear-gradient(135deg, #00D4FF 0%, #7B2FFF 100%);
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+      box-shadow: 0 4px 14px rgba(0, 212, 255, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.3s, box-shadow 0.3s;
-      animation: voice-pulse 2s infinite;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
     }
     .voice-call-btn:hover {
       transform: scale(1.1);
-      box-shadow: 0 6px 30px rgba(0, 212, 255, 0.6);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
     }
     .voice-call-btn svg {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       fill: white;
     }
     .voice-call-btn .badge {
@@ -53,15 +49,28 @@
       border-radius: 10px;
       font-family: 'Inter', sans-serif;
     }
-    @keyframes voice-pulse {
-      0%, 100% { box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4); }
-      50% { box-shadow: 0 4px 30px rgba(123, 47, 255, 0.6); }
+    .voice-call-btn .fab-label {
+      position: absolute;
+      right: 66px;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
+    .voice-call-btn:hover .fab-label { opacity: 1; }
 
     .voice-call-widget {
       position: fixed;
-      bottom: 160px;
-      right: 28px;
+      bottom: 220px;
+      right: 24px;
       z-index: 10001;
       width: 380px;
       max-height: 520px;
@@ -290,25 +299,35 @@
       .voice-call-widget {
         width: calc(100vw - 24px);
         right: 12px;
-        bottom: 140px;
-        max-height: 440px;
+        bottom: 200px;
+        max-height: 400px;
       }
     }
   `;
   document.head.appendChild(style);
 
-  // Create floating button
+  // Create floating button and insert into fab-container
   const btn = document.createElement('button');
   btn.className = 'voice-call-btn';
   btn.title = 'Talk to AI Sales Agent';
   btn.innerHTML = `
+    <span class="fab-label">AI Call</span>
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
     </svg>
     <span class="badge">AI</span>
   `;
   btn.addEventListener('click', toggleWidget);
-  document.body.appendChild(btn);
+  const fabContainer = document.querySelector('.fab-container');
+  if (fabContainer) {
+    fabContainer.insertBefore(btn, fabContainer.firstChild);
+  } else {
+    btn.style.position = 'fixed';
+    btn.style.bottom = '164px';
+    btn.style.right = '24px';
+    btn.style.zIndex = '10000';
+    document.body.appendChild(btn);
+  }
 
   // Create widget
   const widget = document.createElement('div');

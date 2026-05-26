@@ -1552,16 +1552,9 @@ img { max-width: 100%; height: auto; display: block; }
   padding: 4px 0;
 }
 
-/* ============ FLOATING CTA ============ */
-.floating-cta {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 899;
-}
-.floating-cta .btn {
-  box-shadow: 0 8px 32px rgba(0,212,255,0.3);
-}
+/* ============ FLOATING CTA (removed) ============ */
+.floating-cta { display: none !important; }
+.sticky-cta-bar { display: none !important; }
 
 /* ============ prefers-reduced-motion ============ */
 @media (prefers-reduced-motion: reduce) {
