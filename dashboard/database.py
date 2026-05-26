@@ -240,6 +240,26 @@ def init_db():
         created_at TEXT DEFAULT (datetime('now'))
     )''')
     
+    # AI Voice Calls table
+    c.execute('''CREATE TABLE IF NOT EXISTS ai_voice_calls (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        caller_name TEXT,
+        caller_email TEXT,
+        caller_phone TEXT,
+        business_name TEXT,
+        service_interest TEXT,
+        status TEXT DEFAULT 'initiated' CHECK(status IN ('initiated','in_progress','completed','failed','cancelled')),
+        transcript TEXT,
+        summary TEXT,
+        sentiment TEXT,
+        duration_seconds INTEGER DEFAULT 0,
+        ai_provider TEXT DEFAULT 'gemini',
+        source TEXT DEFAULT 'website',
+        lead_id INTEGER REFERENCES sales_leads(id),
+        created_at TEXT DEFAULT (datetime('now')),
+        ended_at TEXT
+    )''')
+
     # API Settings (NEW)
     c.execute('''CREATE TABLE IF NOT EXISTS api_settings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

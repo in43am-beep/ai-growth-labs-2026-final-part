@@ -3374,6 +3374,232 @@ async def public_contact(request: Request):
     return {"message": "Thank you! We'll get back to you within 24 hours.", "success": True}
 
 
+# ==========================================
+# Part 8: AI Voice Call API (Gemini-Powered)
+# ==========================================
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBksyupy31G_udlOAfK2YqcVB7lJsq1VDs")
+
+VOICE_AGENT_PERSONA = """You are Sarah, a friendly and professional AI sales consultant for AI Growth Labs, 
+a leading AI-powered SEO and digital marketing agency. You help local businesses in the USA grow their online presence.
+
+Your role:
+- Greet the caller warmly and ask about their business
+- Understand their pain points (low Google visibility, few reviews, no leads, etc.)
+- Recommend relevant services: Local SEO, GBP Optimization, Reputation Management, AI SEO, Paid Ads, Social Media, Content Creation
+- Offer a free SEO audit
+- Collect their business name, website, and contact info for follow-up
+- Be concise, helpful, and conversational
+
+Key facts about AI Growth Labs:
+- 500+ businesses served, 247% avg traffic growth, 12,000+ reviews generated
+- Month-to-month agreements (no long-term contracts)
+- Free initial SEO audit included
+- Services start from $497/month
+- Phone: +1-800-971-0199
+- Available Mon-Fri 9AM-6PM EST"""
+
+
+@app.post("/api/voice/call/initiate")
+async def initiate_voice_call(request: Request):
+    """Initiate an AI voice call session — returns a call_id and initial greeting."""
+    data = await request.json()
+    caller_name = data.get("name", "").strip()
+    caller_email = data.get("email", "").strip()
+    caller_phone = data.get("phone", "").strip()
+    business_name = data.get("business_name", "").strip()
+    service_interest = data.get("service", "").strip()
+
+    db = get_db()
+    c = db.cursor()
+    c.execute("""INSERT INTO ai_voice_calls 
+        (caller_name, caller_email, caller_phone, business_name, service_interest, status, ai_provider)
+        VALUES (?, ?, ?, ?, ?, 'in_progress', 'gemini')""",
+        (caller_name, caller_email, caller_phone, business_name, service_interest))
+    call_id = c.lastrowid
+
+    # Also save as a lead
+    if caller_email:
+        c.execute("""INSERT OR IGNORE INTO sales_leads 
+            (business_name, contact_name, email, phone, website, source, status, notes)
+            VALUES (?, ?, ?, ?, '', 'website', 'new', ?)""",
+            (business_name or caller_name, caller_name, caller_email, caller_phone,
+             f"AI Voice Call - Service: {service_interest}"))
+    db.commit()
+    db.close()
+
+    greeting = f"Hi{' ' + caller_name.split()[0] if caller_name else ''}! I'm Sarah from AI Growth Labs. "
+    if service_interest:
+        greeting += f"I see you're interested in our {service_interest.replace('-', ' ').title()} services. "
+    greeting += "How can I help grow your business today?"
+
+    return {
+        "call_id": call_id,
+        "status": "in_progress",
+        "message": greeting,
+        "agent_name": "Sarah",
+        "transcript": [{"role": "assistant", "content": greeting}]
+    }
+
+
+@app.post("/api/voice/call/{call_id}/message")
+async def voice_call_message(call_id: int, request: Request):
+    """Send a message in an active AI voice call and get AI response."""
+    data = await request.json()
+    user_message = data.get("message", "").strip()
+    history = data.get("history", [])
+
+    if not user_message:
+        raise HTTPException(status_code=400, detail="Message is required")
+
+    # Get call info
+    db = get_db()
+    call = db.execute("SELECT * FROM ai_voice_calls WHERE id=?", (call_id,)).fetchone()
+    db.close()
+
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+    if dict(call)["status"] not in ("in_progress", "initiated"):
+        raise HTTPException(status_code=400, detail="Call is no longer active")
+
+    # Build conversation for Gemini
+    try:
+        from google import genai
+        client = genai.Client(api_key=GEMINI_API_KEY)
+
+        contents = []
+        for msg in history:
+            role = "user" if msg["role"] == "user" else "model"
+            contents.append({"role": role, "parts": [{"text": msg["content"]}]})
+        contents.append({"role": "user", "parts": [{"text": user_message}]})
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=contents,
+            config={"system_instruction": VOICE_AGENT_PERSONA, "max_output_tokens": 512}
+        )
+        ai_response = response.text
+
+    except Exception as e:
+        ai_response = (
+            "I apologize, I'm having a brief technical issue. "
+            "Would you like to leave your contact info and we'll have a team member call you back? "
+            "You can also reach us directly at +1-800-971-0199."
+        )
+
+    # Update transcript
+    db = get_db()
+    existing = db.execute("SELECT transcript FROM ai_voice_calls WHERE id=?", (call_id,)).fetchone()
+    transcript = json.loads(existing["transcript"]) if existing and existing["transcript"] else []
+    transcript.append({"role": "user", "content": user_message})
+    transcript.append({"role": "assistant", "content": ai_response})
+    db.execute("UPDATE ai_voice_calls SET transcript=? WHERE id=?", (json.dumps(transcript), call_id))
+    db.commit()
+    db.close()
+
+    return {
+        "call_id": call_id,
+        "response": ai_response,
+        "transcript": transcript
+    }
+
+
+@app.post("/api/voice/call/{call_id}/end")
+async def end_voice_call(call_id: int, request: Request):
+    """End an AI voice call and generate summary."""
+    db = get_db()
+    call = db.execute("SELECT * FROM ai_voice_calls WHERE id=?", (call_id,)).fetchone()
+    if not call:
+        db.close()
+        raise HTTPException(status_code=404, detail="Call not found")
+
+    call_dict = dict(call)
+    transcript = json.loads(call_dict["transcript"]) if call_dict.get("transcript") else []
+
+    # Generate summary with Gemini
+    summary = "Call completed."
+    sentiment = "neutral"
+    try:
+        if transcript:
+            from google import genai
+            client = genai.Client(api_key=GEMINI_API_KEY)
+
+            transcript_text = "\n".join([f"{m['role']}: {m['content']}" for m in transcript])
+            summary_prompt = f"""Analyze this sales call transcript and provide a JSON response:
+{{
+  "summary": "2-3 sentence summary of the call",
+  "sentiment": "positive/neutral/negative",
+  "services_discussed": ["list of services mentioned"],
+  "follow_up_needed": true/false,
+  "lead_quality": "hot/warm/cold"
+}}
+
+Transcript:
+{transcript_text}"""
+            resp = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=summary_prompt
+            )
+            try:
+                result = json.loads(resp.text.strip().strip("```json").strip("```"))
+                summary = result.get("summary", summary)
+                sentiment = result.get("sentiment", sentiment)
+            except:
+                summary = resp.text[:500]
+    except:
+        pass
+
+    # Calculate duration
+    from datetime import datetime as dt
+    created = dt.fromisoformat(call_dict["created_at"]) if call_dict.get("created_at") else dt.now()
+    duration = int((dt.now() - created).total_seconds())
+
+    db.execute("""UPDATE ai_voice_calls 
+        SET status='completed', summary=?, sentiment=?, duration_seconds=?, ended_at=datetime('now')
+        WHERE id=?""",
+        (summary, sentiment, duration, call_id))
+    db.commit()
+    db.close()
+
+    return {
+        "call_id": call_id,
+        "status": "completed",
+        "summary": summary,
+        "sentiment": sentiment,
+        "duration_seconds": duration,
+        "message": "Thank you for calling AI Growth Labs! We'll follow up with you shortly."
+    }
+
+
+@app.get("/api/voice/calls")
+async def list_voice_calls(request: Request):
+    """List all AI voice calls (admin only)."""
+    user = get_current_user(request)
+    if not user or user["role"] not in ("super_admin", "operations_manager", "sales"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    db = get_db()
+    calls = [dict(r) for r in db.execute(
+        "SELECT * FROM ai_voice_calls ORDER BY created_at DESC LIMIT 100"
+    ).fetchall()]
+    db.close()
+    return {"calls": calls, "total": len(calls)}
+
+
+@app.get("/api/voice/call/{call_id}")
+async def get_voice_call(call_id: int, request: Request):
+    """Get details of a specific voice call."""
+    db = get_db()
+    call = db.execute("SELECT * FROM ai_voice_calls WHERE id=?", (call_id,)).fetchone()
+    db.close()
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+    call_dict = dict(call)
+    if call_dict.get("transcript"):
+        call_dict["transcript"] = json.loads(call_dict["transcript"])
+    return call_dict
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

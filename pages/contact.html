@@ -383,5 +383,9 @@
   .floating-cta{position:fixed;bottom:24px;right:24px;background:var(--cyan);color:var(--navy-900);padding:12px 24px;border-radius:50px;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 4px 20px rgba(0,212,255,0.4);z-index:9999;transition:all 0.3s ease;}
   .floating-cta:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,212,255,0.6);background:#00e5ff;}
   </style>
+
+  <!-- AI Voice Call Widget -->
+  <script>window.VOICE_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000' : window.location.origin;</script>
+  <script src="../js/voice-call.js"></script>
 </body>
 </html>
