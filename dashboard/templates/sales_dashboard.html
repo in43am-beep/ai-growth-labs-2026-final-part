@@ -76,4 +76,4 @@ function addLead(){api('/api/leads',{business_name:document.getElementById('nl_b
     source:document.getElementById('nl_source').value}).then(()=>location.reload())}
 function moveLead(id,status){if(!status)return;fetch('/api/leads/'+id+'/status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:status})}).then(()=>location.reload())}
 </script>
-</main></body></html>
+</main><script src="/static/js/notifications.js"></script></body></html>

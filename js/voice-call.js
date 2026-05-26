@@ -1,6 +1,6 @@
 /**
- * AI Voice Call Widget — AI Growth Labs
- * Floating call button + chat interface powered by Gemini AI
+ * Call Support Widget — AI Growth Labs
+ * Floating call button + chat interface for customer support
  */
 (function() {
   'use strict';
@@ -37,18 +37,6 @@
       height: 26px;
       fill: white;
     }
-    .voice-call-btn .badge {
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      background: #ff4444;
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-family: 'Inter', sans-serif;
-    }
     .voice-call-btn .fab-label {
       position: absolute;
       right: 66px;
@@ -72,8 +60,8 @@
       bottom: 220px;
       right: 24px;
       z-index: 10001;
-      width: 380px;
-      max-height: 520px;
+      width: 390px;
+      max-height: 560px;
       background: #0F1629;
       border: 1px solid rgba(0, 212, 255, 0.2);
       border-radius: 16px;
@@ -279,6 +267,42 @@
     }
     .vcw-form-input:focus { border-color: #00D4FF; }
     .vcw-form-input::placeholder { color: rgba(255,255,255,0.3); }
+    .vcw-form-input.error { border-color: #ff4444; }
+
+    .vcw-phone-row {
+      display: flex;
+      gap: 8px;
+    }
+    .vcw-country-code {
+      width: 90px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 10px 8px;
+      color: white;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+    .vcw-country-code:focus { border-color: #00D4FF; }
+    .vcw-country-code option { background: #1a1a2e; color: white; }
+    .vcw-phone-input {
+      flex: 1;
+    }
+    .vcw-field-error {
+      color: #ff6666;
+      font-size: 11px;
+      margin-top: -6px;
+      display: none;
+    }
+    .vcw-field-error.show { display: block; }
+
     .vcw-start-btn {
       background: linear-gradient(135deg, #00D4FF, #7B2FFF);
       border: none;
@@ -295,12 +319,25 @@
     .vcw-start-btn:hover { transform: scale(1.02); }
     .vcw-start-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .vcw-online-badge {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #00FF88;
+      display: inline-block;
+      margin-right: 4px;
+      animation: vcw-pulse-dot 2s infinite;
+    }
+    @keyframes vcw-pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
     @media (max-width: 480px) {
       .voice-call-widget {
         width: calc(100vw - 24px);
         right: 12px;
         bottom: 200px;
-        max-height: 400px;
+        max-height: 450px;
       }
     }
   `;
@@ -309,13 +346,12 @@
   // Create floating button and insert into fab-container
   const btn = document.createElement('button');
   btn.className = 'voice-call-btn';
-  btn.title = 'Talk to AI Sales Agent';
+  btn.title = 'Call Support';
   btn.innerHTML = `
-    <span class="fab-label">AI Call</span>
+    <span class="fab-label">Call Support</span>
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
     </svg>
-    <span class="badge">AI</span>
   `;
   btn.addEventListener('click', toggleWidget);
   const fabContainer = document.querySelector('.fab-container');
@@ -335,22 +371,51 @@
   widget.innerHTML = `
     <div class="vcw-header">
       <div class="vcw-header-info">
-        <div class="vcw-avatar">&#x1F4DE;</div>
+        <div class="vcw-avatar">
+          <svg viewBox="0 0 24 24" fill="white" width="20" height="20"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
         <div>
-          <h4>AI Sales Agent</h4>
-          <p id="vcwStatus">Ready to connect</p>
+          <h4>Growth Consultant</h4>
+          <p id="vcwStatus"><span class="vcw-online-badge"></span>Online now</p>
         </div>
       </div>
       <button class="vcw-close" id="vcwClose">&times;</button>
     </div>
     <div id="vcwStartForm" class="vcw-start-form">
-      <h3>Start AI Consultation</h3>
-      <p>Our AI agent Sarah will help you find the right SEO solution for your business.</p>
+      <h3>Schedule a Quick Call</h3>
+      <p>Our growth specialist will help you find the best strategy for your business.</p>
       <input class="vcw-form-input" id="vcwName" placeholder="Your Name *" required>
+      <span class="vcw-field-error" id="vcwNameErr">Please enter your name</span>
       <input class="vcw-form-input" id="vcwEmail" placeholder="Email *" type="email" required>
-      <input class="vcw-form-input" id="vcwPhone" placeholder="Phone (optional)" type="tel">
+      <span class="vcw-field-error" id="vcwEmailErr">Please enter a valid email</span>
+      <div class="vcw-phone-row">
+        <select class="vcw-country-code" id="vcwCountryCode">
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+92">🇵🇰 +92</option>
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+61">🇦🇺 +61</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+971">🇦🇪 +971</option>
+          <option value="+966">🇸🇦 +966</option>
+          <option value="+55">🇧🇷 +55</option>
+          <option value="+86">🇨🇳 +86</option>
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+82">🇰🇷 +82</option>
+          <option value="+39">🇮🇹 +39</option>
+          <option value="+34">🇪🇸 +34</option>
+          <option value="+7">🇷🇺 +7</option>
+          <option value="+52">🇲🇽 +52</option>
+          <option value="+27">🇿🇦 +27</option>
+          <option value="+234">🇳🇬 +234</option>
+          <option value="+254">🇰🇪 +254</option>
+        </select>
+        <input class="vcw-form-input vcw-phone-input" id="vcwPhone" placeholder="Phone Number *" type="tel" required>
+      </div>
+      <span class="vcw-field-error" id="vcwPhoneErr">Please enter a valid phone number</span>
       <input class="vcw-form-input" id="vcwBusiness" placeholder="Business Name (optional)">
-      <button class="vcw-start-btn" id="vcwStartBtn">Start AI Call &#x1F4DE;</button>
+      <button class="vcw-start-btn" id="vcwStartBtn">Connect Now &#x260E;</button>
     </div>
     <div id="vcwChat" style="display:none;flex:1;display:none;flex-direction:column;">
       <div class="vcw-messages" id="vcwMessages"></div>
@@ -362,7 +427,7 @@
         </button>
       </div>
       <div class="vcw-footer">
-        <button class="vcw-end-call" id="vcwEndCall">End Call</button>
+        <button class="vcw-end-call" id="vcwEndCall">End Session</button>
       </div>
     </div>
   `;
@@ -381,16 +446,47 @@
     widget.classList.toggle('active');
   }
 
+  function validatePhone(phone) {
+    const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+    return cleaned.length >= 7 && cleaned.length <= 15 && /^\d+$/.test(cleaned);
+  }
+
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
   async function startCall() {
     const name = document.getElementById('vcwName').value.trim();
     const email = document.getElementById('vcwEmail').value.trim();
-    const phone = document.getElementById('vcwPhone').value.trim();
+    const phoneRaw = document.getElementById('vcwPhone').value.trim();
+    const countryCode = document.getElementById('vcwCountryCode').value;
     const business = document.getElementById('vcwBusiness').value.trim();
 
-    if (!name || !email) {
-      alert('Please enter your name and email.');
-      return;
+    // Clear errors
+    document.querySelectorAll('.vcw-field-error').forEach(el => el.classList.remove('show'));
+    document.querySelectorAll('.vcw-form-input').forEach(el => el.classList.remove('error'));
+
+    let hasError = false;
+
+    if (!name) {
+      document.getElementById('vcwNameErr').classList.add('show');
+      document.getElementById('vcwName').classList.add('error');
+      hasError = true;
     }
+    if (!email || !validateEmail(email)) {
+      document.getElementById('vcwEmailErr').classList.add('show');
+      document.getElementById('vcwEmail').classList.add('error');
+      hasError = true;
+    }
+    if (!phoneRaw || !validatePhone(phoneRaw)) {
+      document.getElementById('vcwPhoneErr').classList.add('show');
+      document.getElementById('vcwPhone').classList.add('error');
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    const phone = countryCode + phoneRaw.replace(/[\s\-\(\)]/g, '');
 
     const startBtn = document.getElementById('vcwStartBtn');
     startBtn.disabled = true;
@@ -413,7 +509,7 @@
       chatEl.style.display = 'flex';
       chatEl.style.flexDirection = 'column';
       chatEl.style.flex = '1';
-      document.getElementById('vcwStatus').textContent = 'Connected with Sarah';
+      document.getElementById('vcwStatus').innerHTML = '<span class="vcw-online-badge"></span>Connected';
       document.getElementById('vcwStatus').style.color = '#00FF88';
 
       // Show greeting
@@ -421,7 +517,7 @@
 
     } catch (err) {
       startBtn.disabled = false;
-      startBtn.textContent = 'Start AI Call \u{1F4DE}';
+      startBtn.textContent = 'Connect Now \u260E';
       addMessage('system', 'Connection failed. Please try again or call us at +1-800-971-0199.');
     }
   }
@@ -466,19 +562,19 @@
         headers: { 'Content-Type': 'application/json' }
       });
       const data = await resp.json();
-      addMessage('system', data.message || 'Call ended. Thank you!');
+      addMessage('system', data.message || 'Session ended. Thank you!');
       if (data.summary) {
         addMessage('system', 'Summary: ' + data.summary);
       }
     } catch (err) {
-      addMessage('system', 'Call ended.');
+      addMessage('system', 'Session ended.');
     }
 
-    document.getElementById('vcwStatus').textContent = 'Call ended';
+    document.getElementById('vcwStatus').innerHTML = 'Session ended';
     document.getElementById('vcwStatus').style.color = '#ff6666';
     document.getElementById('vcwInput').disabled = true;
     document.getElementById('vcwSend').disabled = true;
-    document.getElementById('vcwEndCall').textContent = 'Call Ended';
+    document.getElementById('vcwEndCall').textContent = 'Session Ended';
     document.getElementById('vcwEndCall').disabled = true;
   }
 

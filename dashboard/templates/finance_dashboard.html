@@ -115,4 +115,4 @@ if(inv.status!=='paid')html+='<button class="btn btn-sm btn-success" onclick="ma
 html+='</td></tr>'});html+='</tbody></table>';el.innerHTML=html})
 function markPaid(id){fetch('/api/invoices/'+id+'/status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'paid'})}).then(()=>location.reload())}
 </script>
-</main></body></html>
+</main><script src="/static/js/notifications.js"></script></body></html>

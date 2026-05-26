@@ -260,6 +260,22 @@ def init_db():
         ended_at TEXT
     )''')
 
+    # SEO Questionnaires table
+    c.execute('''CREATE TABLE IF NOT EXISTS seo_questionnaires (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_name TEXT,
+        client_email TEXT,
+        client_phone TEXT,
+        business_name TEXT,
+        answers TEXT,
+        comments TEXT,
+        source TEXT DEFAULT 'client_portal',
+        status TEXT DEFAULT 'submitted' CHECK(status IN ('submitted','reviewed','in_progress','completed')),
+        reviewed_by INTEGER REFERENCES users(id),
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+    )''')
+
     # API Settings (NEW)
     c.execute('''CREATE TABLE IF NOT EXISTS api_settings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO Strategy Questionnaire — AI Growth Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-card: #0F1629;
+      --bg-input: rgba(255,255,255,0.06);
+      --border-color: rgba(255,255,255,0.12);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255,255,255,0.6);
+      --accent: #00D4FF;
+      --accent2: #7B2FFF;
+      --success: #00FF88;
+      --error: #ff4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .q-header {
+      background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(123,47,255,0.1));
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 0;
+    }
+    .q-header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .q-logo {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .q-header-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .q-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+    .q-hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .q-hero h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .q-hero p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .q-progress {
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      height: 6px;
+      margin-bottom: 32px;
+      overflow: hidden;
+    }
+    .q-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 20px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .q-progress-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-bottom: 6px;
+    }
+
+    .q-section {
+      margin-bottom: 32px;
+    }
+    .q-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0,212,255,0.2);
+    }
+    .q-field {
+      margin-bottom: 18px;
+    }
+    .q-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .q-label .q-required {
+      color: var(--error);
+      font-weight: 600;
+    }
+    .q-label .q-optional {
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: 11px;
+    }
+    .q-input, .q-textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .q-input:focus, .q-textarea:focus { border-color: var(--accent); }
+    .q-input::placeholder, .q-textarea::placeholder { color: rgba(255,255,255,0.3); }
+    .q-input.error, .q-textarea.error { border-color: var(--error); }
+    .q-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .q-skip-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .q-skip-row input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+    .q-skip-row label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .q-field-error {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+    .q-field-error.show { display: block; }
+
+    .q-client-info {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .q-client-info h3 {
+      font-size: 15px;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+    .q-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .q-info-grid { grid-template-columns: 1fr; }
+    }
+
+    .q-comment-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 32px;
+    }
+    .q-comment-box h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    .q-comment-box p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .q-submit-area {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .q-submit-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 48px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .q-submit-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(0,212,255,0.3); }
+    .q-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .q-submit-msg {
+      margin-top: 12px;
+      font-size: 13px;
+      display: none;
+    }
+    .q-submit-msg.success { display: block; color: var(--success); }
+    .q-submit-msg.error { display: block; color: var(--error); }
+
+    .q-login-card {
+      max-width: 420px;
+      margin: 80px auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+    .q-login-card h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .q-login-card p {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+    .q-login-card .q-input {
+      margin-bottom: 12px;
+    }
+    .q-login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      margin-top: 8px;
+    }
+    .q-login-btn:hover { transform: scale(1.01); }
+  </style>
+</head>
+<body>
+  <div class="q-header">
+    <div class="q-header-inner">
+      <div class="q-logo">AI Growth Labs</div>
+      <div class="q-header-status" id="qHeaderStatus">Client Portal</div>
+    </div>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="qLogin">
+    <div class="q-login-card">
+      <h2>Client Portal</h2>
+      <p>Enter your details to access the SEO Strategy Questionnaire</p>
+      <input class="q-input" id="loginName" placeholder="Your Name *" required>
+      <input class="q-input" id="loginEmail" placeholder="Email *" type="email" required>
+      <input class="q-input" id="loginPhone" placeholder="Phone Number" type="tel">
+      <input class="q-input" id="loginBusiness" placeholder="Business Name *" required>
+      <button class="q-login-btn" id="loginBtn">Access Questionnaire</button>
+      <div class="q-submit-msg" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- Questionnaire Form (hidden until login) -->
+  <div id="qForm" style="display:none;">
+    <div class="q-container">
+      <div class="q-hero">
+        <h1>SEO Strategy Questionnaire</h1>
+        <p>Help us understand your business so we can build the perfect SEO strategy. Answer as many questions as you can — you can skip any optional ones.</p>
+      </div>
+
+      <div class="q-progress-text" id="progressText">0 of 25 answered</div>
+      <div class="q-progress"><div class="q-progress-bar" id="progressBar"></div></div>
+
+      <div id="questionsContainer"></div>
+
+      <div class="q-comment-box">
+        <h3>Additional Comments</h3>
+        <p>Anything else you'd like us to know about your business, challenges, or goals?</p>
+        <textarea class="q-textarea" id="qComments" placeholder="Share any additional details here..." rows="4"></textarea>
+      </div>
+
+      <div class="q-submit-area">
+        <button class="q-submit-btn" id="qSubmitBtn">Submit Questionnaire</button>
+        <div class="q-submit-msg" id="qSubmitMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const API = window.location.origin;
+    let clientInfo = {};
+
+    // Login
+    document.getElementById('loginBtn').addEventListener('click', function() {
+      const name = document.getElementById('loginName').value.trim();
+      const email = document.getElementById('loginEmail').value.trim();
+      const phone = document.getElementById('loginPhone').value.trim();
+      const business = document.getElementById('loginBusiness').value.trim();
+
+      if (!name || !email || !business) {
+        const err = document.getElementById('loginError');
+        err.textContent = 'Please fill in Name, Email, and Business Name.';
+        err.className = 'q-submit-msg error';
+        return;
+      }
+
+      clientInfo = { name, email, phone, business };
+      document.getElementById('qLogin').style.display = 'none';
+      document.getElementById('qForm').style.display = 'block';
+      document.getElementById('qHeaderStatus').textContent = 'Welcome, ' + name.split(' ')[0];
+
+      loadQuestions();
+    });
+
+    async function loadQuestions() {
+      try {
+        const resp = await fetch(API + '/api/seo-questionnaire/questions');
+        const data = await resp.json();
+        renderQuestions(data.questions);
+      } catch (e) {
+        renderFallbackQuestions();
+      }
+    }
+
+    function renderFallbackQuestions() {
+      const fallback = [
+        {id:1,category:"Business Overview",question:"What is your business name and what products/services do you offer?",required:true},
+        {id:2,category:"Business Overview",question:"What is your business website URL?",required:true},
+        {id:3,category:"Business Overview",question:"What geographic areas do you serve?",required:true},
+        {id:4,category:"Business Overview",question:"Who is your ideal customer? Describe your target audience.",required:true},
+        {id:5,category:"Business Overview",question:"What are your top 3 competitors and their websites?",required:true},
+        {id:6,category:"Current SEO Status",question:"Have you done any SEO work before? If yes, what was done?",required:false},
+        {id:7,category:"Current SEO Status",question:"Do you currently rank for any keywords? Which ones?",required:false},
+        {id:8,category:"Current SEO Status",question:"What is your current monthly website traffic (approximate)?",required:false},
+        {id:9,category:"Current SEO Status",question:"Do you have Google Search Console and Google Analytics set up?",required:true},
+        {id:10,category:"Current SEO Status",question:"Do you have a Google Business Profile? Is it verified?",required:true},
+        {id:11,category:"Goals & Objectives",question:"What are your top 3 business goals for the next 12 months?",required:true},
+        {id:12,category:"Goals & Objectives",question:"What keywords do you want to rank for? List top 10-15.",required:true},
+        {id:13,category:"Goals & Objectives",question:"What is your monthly budget for SEO and digital marketing?",required:false},
+        {id:14,category:"Goals & Objectives",question:"How many leads/calls/sales do you want monthly from SEO?",required:true},
+        {id:15,category:"Goals & Objectives",question:"What is the average value of a new customer to your business?",required:false},
+        {id:16,category:"Content & Website",question:"Do you have a blog? How often do you publish content?",required:false},
+        {id:17,category:"Content & Website",question:"What CMS does your website use? (WordPress, Shopify, etc.)",required:true},
+        {id:18,category:"Content & Website",question:"Is your website mobile-friendly? When was it last redesigned?",required:false},
+        {id:19,category:"Content & Website",question:"Do you have existing content (blogs, videos, case studies)?",required:false},
+        {id:20,category:"Reputation & Reviews",question:"How many Google reviews do you have? What is your average rating?",required:true},
+        {id:21,category:"Reputation & Reviews",question:"Do you have a process for generating customer reviews?",required:false},
+        {id:22,category:"Social & Advertising",question:"Which social media platforms are you active on?",required:false},
+        {id:23,category:"Social & Advertising",question:"Are you running any paid advertising? (Google Ads, etc.)",required:false},
+        {id:24,category:"Access & Permissions",question:"Can you provide access to GSC, GA, and Google Business Profile?",required:true},
+        {id:25,category:"Additional Info",question:"Is there anything else about your business or goals?",required:false}
+      ];
+      renderQuestions(fallback);
+    }
+
+    function renderQuestions(questions) {
+      const container = document.getElementById('questionsContainer');
+      let currentCategory = '';
+
+      questions.forEach(q => {
+        if (q.category !== currentCategory) {
+          currentCategory = q.category;
+          const section = document.createElement('div');
+          section.className = 'q-section';
+          section.innerHTML = '<h2 class="q-section-title">' + currentCategory + '</h2>';
+          container.appendChild(section);
+        }
+
+        const field = document.createElement('div');
+        field.className = 'q-field';
+        const reqLabel = q.required
+          ? '<span class="q-required">*</span>'
+          : '<span class="q-optional">(Optional)</span>';
+        field.innerHTML = `
+          <label class="q-label">Q${q.id}. ${q.question} ${reqLabel}</label>
+          <textarea class="q-textarea q-answer" id="q_${q.id}" data-qid="${q.id}" data-required="${q.required}" rows="2" placeholder="Your answer..."></textarea>
+          ${!q.required ? '<div class="q-skip-row"><input type="checkbox" id="skip_'+q.id+'" data-skip="'+q.id+'"><label for="skip_'+q.id+'">Skip this question</label></div>' : ''}
+          <div class="q-field-error" id="err_${q.id}">This question is required</div>
+        `;
+        container.appendChild(field);
+      });
+
+      // Attach progress listener
+      container.querySelectorAll('.q-answer').forEach(el => {
+        el.addEventListener('input', updateProgress);
+      });
+      container.querySelectorAll('[data-skip]').forEach(el => {
+        el.addEventListener('change', function() {
+          const qid = this.getAttribute('data-skip');
+          const textarea = document.getElementById('q_' + qid);
+          if (this.checked) {
+            textarea.disabled = true;
+            textarea.style.opacity = '0.3';
+          } else {
+            textarea.disabled = false;
+            textarea.style.opacity = '1';
+          }
+          updateProgress();
+        });
+      });
+    }
+
+    function updateProgress() {
+      const all = document.querySelectorAll('.q-answer');
+      let answered = 0;
+      all.forEach(el => {
+        const qid = el.getAttribute('data-qid');
+        const skipEl = document.getElementById('skip_' + qid);
+        if (el.value.trim() || (skipEl && skipEl.checked)) answered++;
+      });
+      const pct = Math.round((answered / all.length) * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressText').textContent = answered + ' of ' + all.length + ' answered';
+    }
+
+    // Submit
+    document.getElementById('qSubmitBtn').addEventListener('click', async function() {
+      const btn = this;
+      const msgEl = document.getElementById('qSubmitMsg');
+
+      // Validate required fields
+      let valid = true;
+      document.querySelectorAll('.q-answer[data-required="true"]').forEach(el => {
+        const qid = el.getAttribute('data-qid');
+        const errEl = document.getElementById('err_' + qid);
+        if (!el.value.trim()) {
+          el.classList.add('error');
+          errEl.classList.add('show');
+          valid = false;
+        } else {
+          el.classList.remove('error');
+          errEl.classList.remove('show');
+        }
+      });
+
+      if (!valid) {
+        msgEl.textContent = 'Please answer all required questions marked with *';
+        msgEl.className = 'q-submit-msg error';
+        document.querySelector('.q-field .error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Collect answers
+      const answers = {};
+      document.querySelectorAll('.q-answer').forEach(el => {
+        const qid = el.getAttribute('data-qid');
+        const skipEl = document.getElementById('skip_' + qid);
+        if (skipEl && skipEl.checked) {
+          answers[qid] = '[Skipped]';
+        } else {
+          answers[qid] = el.value.trim() || '';
+        }
+      });
+
+      const comments = document.getElementById('qComments').value.trim();
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const resp = await fetch(API + '/api/seo-questionnaire/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_name: clientInfo.name,
+            client_email: clientInfo.email,
+            client_phone: clientInfo.phone,
+            business_name: clientInfo.business,
+            answers,
+            comments,
+            source: 'client_portal'
+          })
+        });
+        const data = await resp.json();
+        msgEl.textContent = data.message || 'Questionnaire submitted successfully!';
+        msgEl.className = 'q-submit-msg success';
+        btn.textContent = 'Submitted!';
+      } catch (e) {
+        msgEl.textContent = 'Error submitting. Please try again or call +1-800-971-0199.';
+        msgEl.className = 'q-submit-msg error';
+        btn.disabled = false;
+        btn.textContent = 'Submit Questionnaire';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

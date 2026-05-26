@@ -3386,16 +3386,19 @@ async def public_contact(request: Request):
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBksyupy31G_udlOAfK2YqcVB7lJsq1VDs")
 
-VOICE_AGENT_PERSONA = """You are Sarah, a friendly and professional AI sales consultant for AI Growth Labs, 
-a leading AI-powered SEO and digital marketing agency. You help local businesses in the USA grow their online presence.
+VOICE_AGENT_PERSONA = """You are Sarah, a senior growth consultant at AI Growth Labs.
+You are a real person from the strategy department — never mention AI, chatbot, or automated system.
+Talk naturally like a human support representative. Use casual professional tone.
 
 Your role:
-- Greet the caller warmly and ask about their business
-- Understand their pain points (low Google visibility, few reviews, no leads, etc.)
-- Recommend relevant services: Local SEO, GBP Optimization, Reputation Management, AI SEO, Paid Ads, Social Media, Content Creation
-- Offer a free SEO audit
-- Collect their business name, website, and contact info for follow-up
-- Be concise, helpful, and conversational
+- Greet warmly, ask about their business challenges
+- Listen to their pain points (low Google visibility, few reviews, no leads, poor rankings)
+- Recommend relevant services: Local SEO, Google Business Profile Optimization, Reputation Management, Paid Advertising, Social Media Marketing, Content Strategy
+- Offer a free comprehensive SEO audit
+- Collect their business name, website, and best time for a detailed strategy call
+- Be concise, helpful, and conversational — like a real consultant
+- Never say "I'm an AI" or "as an AI" — you are Sarah from the growth team
+- If asked if you're a bot, say "No, I'm Sarah from the growth consulting team"
 
 Key facts about AI Growth Labs:
 - 500+ businesses served, 247% avg traffic growth, 12,000+ reviews generated
@@ -3403,7 +3406,36 @@ Key facts about AI Growth Labs:
 - Free initial SEO audit included
 - Services start from $497/month
 - Phone: +1-800-971-0199
-- Available Mon-Fri 9AM-6PM EST"""
+- Available Mon-Fri 9AM-6PM EST
+- Based in the USA, serving local businesses nationwide
+
+When a client has agreed to work with us (project awarded / conversion done), during the strategy call collect these key details naturally:
+1. Business name, products/services, and website URL
+2. Geographic areas they serve
+3. Their ideal customer and target audience
+4. Top 3 competitors and their websites
+5. Previous SEO work done (if any)
+6. Current keyword rankings
+7. Monthly website traffic
+8. Google Search Console and Analytics setup status
+9. Google Business Profile status (verified? optimized?)
+10. Top 3 business goals for next 12 months
+11. Target keywords (top 10-15)
+12. Monthly SEO budget
+13. Desired monthly leads/calls/sales from SEO
+14. Average customer lifetime value
+15. Blog presence and content publishing frequency
+16. CMS platform (WordPress, Shopify, etc.)
+17. Mobile-friendliness and last website redesign
+18. Existing content assets (blogs, videos, case studies)
+19. Number of Google reviews and average rating
+20. Review generation process
+21. Active social media platforms
+22. Current paid advertising campaigns
+23. Access availability (GSC, GA, GBP)
+24. Any special notes about their business
+
+Ask these naturally in conversation — don't read them like a checklist. If the client doesn't want to answer on the call, offer to email them a questionnaire form they can fill out at their convenience."""
 
 
 @app.post("/api/voice/call/initiate")
@@ -3434,10 +3466,10 @@ async def initiate_voice_call(request: Request):
     db.commit()
     db.close()
 
-    greeting = f"Hi{' ' + caller_name.split()[0] if caller_name else ''}! I'm Sarah from AI Growth Labs. "
+    greeting = f"Hi{' ' + caller_name.split()[0] if caller_name else ''}! This is Sarah from the Growth Labs team. "
     if service_interest:
-        greeting += f"I see you're interested in our {service_interest.replace('-', ' ').title()} services. "
-    greeting += "How can I help grow your business today?"
+        greeting += f"I understand you're looking into our {service_interest.replace('-', ' ').title()} solutions. "
+    greeting += "Thanks for reaching out — how can I help your business today?"
 
     return {
         "call_id": call_id,
@@ -3607,7 +3639,376 @@ async def get_voice_call(call_id: int, request: Request):
 
 
 # ==========================================
-# Part 9: Frontend Static Site Serving
+# Part 9: Live Chat API (Custom Chatbot)
+# ==========================================
+
+CHATBOT_PERSONA = """You are a senior SEO consultant and digital growth strategist at AI Growth Labs.
+You are a real human expert — never reveal you are AI or automated.
+Your name is Alex and you work in the client success team.
+
+Your expertise:
+- Local SEO strategy and Google Business Profile optimization
+- Reputation management and review generation
+- Content marketing and keyword research
+- Paid advertising (Google Ads, Meta Ads)
+- Social media marketing strategy
+- Website conversion rate optimization
+- Technical SEO audits
+- Link building and digital PR
+- AI-powered SEO and GEO optimization
+
+Your job in this chat:
+1. Greet the visitor warmly and ask how you can help
+2. Understand their business type, location, and current challenges
+3. Ask about their current online presence (website, Google Business Profile, reviews)
+4. Identify their biggest pain points (low traffic, no leads, bad reviews, invisible on Google Maps)
+5. Recommend specific services based on their needs
+6. Offer a FREE comprehensive SEO audit
+7. Collect their contact info for follow-up (name, email, phone, business name, website)
+8. If they're interested, suggest scheduling a strategy call
+9. Be knowledgeable, helpful, and never pushy
+10. Give real actionable tips to build trust
+
+Key facts:
+- 500+ businesses served, 247% avg traffic growth
+- Month-to-month, no long-term contracts
+- Free initial SEO audit
+- Services from $497/month
+- Phone: +1-800-971-0199
+- Mon-Fri 9AM-6PM EST"""
+
+
+@app.post("/api/chat/start")
+async def start_chat_session(request: Request):
+    """Start a new live chat session."""
+    data = await request.json()
+    visitor_name = data.get("name", "").strip()
+    visitor_email = data.get("email", "").strip()
+
+    session_id = f"chat_{datetime.now().strftime('%Y%m%d%H%M%S')}_{id(request)}"
+
+    db = get_db()
+    db.execute("""INSERT INTO chat_messages 
+        (session_id, visitor_name, visitor_email, messages, status)
+        VALUES (?, ?, ?, ?, 'active')""",
+        (session_id, visitor_name, visitor_email, json.dumps([])))
+    db.commit()
+    db.close()
+
+    greeting = f"Hi{' ' + visitor_name.split()[0] if visitor_name else ''}! I'm Alex from the Growth Labs team. How can I help your business grow today?"
+
+    return {
+        "session_id": session_id,
+        "message": greeting,
+        "agent_name": "Alex"
+    }
+
+
+@app.post("/api/chat/message")
+async def chat_message(request: Request):
+    """Send a message in live chat and get response."""
+    data = await request.json()
+    session_id = data.get("session_id", "")
+    user_message = data.get("message", "").strip()
+    history = data.get("history", [])
+
+    if not user_message:
+        raise HTTPException(status_code=400, detail="Message is required")
+
+    try:
+        from google import genai
+        client = genai.Client(api_key=GEMINI_API_KEY)
+
+        contents = []
+        for msg in history:
+            role = "user" if msg["role"] == "user" else "model"
+            contents.append({"role": role, "parts": [{"text": msg["content"]}]})
+        contents.append({"role": "user", "parts": [{"text": user_message}]})
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=contents,
+            config={"system_instruction": CHATBOT_PERSONA, "max_output_tokens": 512}
+        )
+        ai_response = response.text
+    except Exception:
+        ai_response = (
+            "Thanks for your message! Let me look into that for you. "
+            "In the meantime, feel free to call us at +1-800-971-0199 or "
+            "email hello@aigrowthlabs.com for immediate assistance."
+        )
+
+    # Save to DB
+    try:
+        db = get_db()
+        existing = db.execute("SELECT messages FROM chat_messages WHERE session_id=?", (session_id,)).fetchone()
+        msgs = json.loads(existing["messages"]) if existing and existing["messages"] else []
+        msgs.append({"role": "user", "content": user_message})
+        msgs.append({"role": "assistant", "content": ai_response})
+        db.execute("UPDATE chat_messages SET messages=?, updated_at=datetime('now') WHERE session_id=?",
+                   (json.dumps(msgs), session_id))
+        db.commit()
+        db.close()
+    except Exception:
+        pass
+
+    return {"response": ai_response, "session_id": session_id}
+
+
+@app.post("/api/chat/end")
+async def end_chat_session(request: Request):
+    """End a chat session and save contact info."""
+    data = await request.json()
+    session_id = data.get("session_id", "")
+    visitor_name = data.get("name", "")
+    visitor_email = data.get("email", "")
+    visitor_phone = data.get("phone", "")
+    business_name = data.get("business_name", "")
+
+    db = get_db()
+    db.execute("""UPDATE chat_messages 
+        SET status='closed', visitor_name=?, visitor_email=?, visitor_phone=?, business_name=?, updated_at=datetime('now')
+        WHERE session_id=?""",
+        (visitor_name, visitor_email, visitor_phone, business_name, session_id))
+
+    # Save as lead if email provided
+    if visitor_email:
+        db.execute("""INSERT OR IGNORE INTO sales_leads 
+            (business_name, contact_name, email, phone, website, source, status, notes)
+            VALUES (?, ?, ?, ?, '', 'website', 'new', 'Live Chat Lead')""",
+            (business_name or visitor_name, visitor_name, visitor_email, visitor_phone))
+
+    # Create notification for admin
+    admins = db.execute("SELECT id FROM users WHERE role IN ('super_admin','sales','operations_manager')").fetchall()
+    for admin in admins:
+        db.execute("""INSERT INTO notifications (user_id, title, message, type, link)
+            VALUES (?, ?, ?, 'info', '/dashboard#leads')""",
+            (admin["id"], f"New Chat Lead: {visitor_name or 'Visitor'}",
+             f"Live chat session ended. Contact: {visitor_email or 'N/A'}, Phone: {visitor_phone or 'N/A'}"))
+
+    db.commit()
+    db.close()
+
+    return {"status": "closed", "message": "Chat session saved. Our team will follow up!"}
+
+
+# ==========================================
+# Part 10: SEO Strategy Questionnaire API
+# ==========================================
+
+SEO_QUESTIONS = [
+    {"id": 1, "category": "Business Overview", "question": "What is your business name and what products/services do you offer?", "required": True},
+    {"id": 2, "category": "Business Overview", "question": "What is your business website URL?", "required": True},
+    {"id": 3, "category": "Business Overview", "question": "What geographic areas do you serve? (City, State, National, International)", "required": True},
+    {"id": 4, "category": "Business Overview", "question": "Who is your ideal customer? Describe your target audience.", "required": True},
+    {"id": 5, "category": "Business Overview", "question": "What are your top 3 competitors and their websites?", "required": True},
+    {"id": 6, "category": "Current SEO Status", "question": "Have you done any SEO work before? If yes, what was done?", "required": False},
+    {"id": 7, "category": "Current SEO Status", "question": "Do you currently rank for any keywords? Which ones?", "required": False},
+    {"id": 8, "category": "Current SEO Status", "question": "What is your current monthly website traffic (approximate)?", "required": False},
+    {"id": 9, "category": "Current SEO Status", "question": "Do you have Google Search Console and Google Analytics set up?", "required": True},
+    {"id": 10, "category": "Current SEO Status", "question": "Do you have a Google Business Profile? Is it verified and optimized?", "required": True},
+    {"id": 11, "category": "Goals & Objectives", "question": "What are your top 3 business goals for the next 12 months?", "required": True},
+    {"id": 12, "category": "Goals & Objectives", "question": "What keywords do you want to rank for? List your top 10-15 target keywords.", "required": True},
+    {"id": 13, "category": "Goals & Objectives", "question": "What is your monthly budget for SEO and digital marketing?", "required": False},
+    {"id": 14, "category": "Goals & Objectives", "question": "How many leads/calls/sales do you want to generate monthly from SEO?", "required": True},
+    {"id": 15, "category": "Goals & Objectives", "question": "What is the average value of a new customer/client to your business?", "required": False},
+    {"id": 16, "category": "Content & Website", "question": "Do you have a blog? How often do you publish content?", "required": False},
+    {"id": 17, "category": "Content & Website", "question": "What CMS does your website use? (WordPress, Shopify, Wix, Custom, etc.)", "required": True},
+    {"id": 18, "category": "Content & Website", "question": "Is your website mobile-friendly? When was it last redesigned?", "required": False},
+    {"id": 19, "category": "Content & Website", "question": "Do you have existing content (blogs, videos, case studies) we can leverage?", "required": False},
+    {"id": 20, "category": "Reputation & Reviews", "question": "How many Google reviews do you currently have? What is your average rating?", "required": True},
+    {"id": 21, "category": "Reputation & Reviews", "question": "Do you have a process for generating customer reviews?", "required": False},
+    {"id": 22, "category": "Social & Advertising", "question": "Which social media platforms are you active on?", "required": False},
+    {"id": 23, "category": "Social & Advertising", "question": "Are you running any paid advertising? (Google Ads, Facebook Ads, etc.)", "required": False},
+    {"id": 24, "category": "Access & Permissions", "question": "Can you provide access to Google Search Console, Google Analytics, and Google Business Profile?", "required": True},
+    {"id": 25, "category": "Additional Info", "question": "Is there anything else you'd like us to know about your business or goals?", "required": False}
+]
+
+
+@app.get("/api/seo-questionnaire/questions")
+async def get_seo_questions():
+    """Get the 25 SEO strategy questions."""
+    return {"questions": SEO_QUESTIONS, "total": len(SEO_QUESTIONS)}
+
+
+@app.post("/api/seo-questionnaire/submit")
+async def submit_seo_questionnaire(request: Request):
+    """Submit completed SEO questionnaire."""
+    data = await request.json()
+    client_name = data.get("client_name", "")
+    client_email = data.get("client_email", "")
+    client_phone = data.get("client_phone", "")
+    business_name = data.get("business_name", "")
+    answers = data.get("answers", {})
+    comments = data.get("comments", "")
+    source = data.get("source", "client_portal")
+
+    db = get_db()
+
+    # Save questionnaire
+    c = db.cursor()
+    c.execute("""CREATE TABLE IF NOT EXISTS seo_questionnaires (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_name TEXT,
+        client_email TEXT,
+        client_phone TEXT,
+        business_name TEXT,
+        answers TEXT,
+        comments TEXT,
+        source TEXT DEFAULT 'client_portal',
+        status TEXT DEFAULT 'submitted' CHECK(status IN ('submitted','reviewed','in_progress','completed')),
+        reviewed_by INTEGER REFERENCES users(id),
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+    )""")
+    c.execute("""INSERT INTO seo_questionnaires 
+        (client_name, client_email, client_phone, business_name, answers, comments, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (client_name, client_email, client_phone, business_name, json.dumps(answers), comments, source))
+    questionnaire_id = c.lastrowid
+
+    # Notify admin and sales team
+    admins = db.execute("SELECT id FROM users WHERE role IN ('super_admin','sales','operations_manager','tech_seo')").fetchall()
+    for admin in admins:
+        db.execute("""INSERT INTO notifications (user_id, title, message, type, link)
+            VALUES (?, ?, ?, 'success', '/dashboard#questionnaires')""",
+            (admin["id"],
+             f"New SEO Questionnaire: {business_name or client_name}",
+             f"Client {client_name} ({client_email}) submitted their SEO strategy questionnaire. {len(answers)} questions answered."))
+
+    db.commit()
+    db.close()
+
+    return {
+        "questionnaire_id": questionnaire_id,
+        "status": "submitted",
+        "message": "Thank you! Your SEO strategy questionnaire has been submitted. Our team will review it and get back to you within 24 hours."
+    }
+
+
+@app.get("/api/seo-questionnaire/{questionnaire_id}")
+async def get_seo_questionnaire(questionnaire_id: int, request: Request):
+    """Get a specific questionnaire submission."""
+    db = get_db()
+    q = db.execute("SELECT * FROM seo_questionnaires WHERE id=?", (questionnaire_id,)).fetchone()
+    db.close()
+    if not q:
+        raise HTTPException(status_code=404, detail="Questionnaire not found")
+    q_dict = dict(q)
+    if q_dict.get("answers"):
+        q_dict["answers"] = json.loads(q_dict["answers"])
+    return q_dict
+
+
+@app.get("/api/notifications")
+async def get_notifications(request: Request):
+    """Get notifications for current user."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    db = get_db()
+    notifications = [dict(r) for r in db.execute(
+        "SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 50",
+        (user["id"],)
+    ).fetchall()]
+    unread_count = db.execute(
+        "SELECT COUNT(*) as cnt FROM notifications WHERE user_id=? AND is_read=0",
+        (user["id"],)
+    ).fetchone()["cnt"]
+    db.close()
+
+    return {"notifications": notifications, "unread_count": unread_count}
+
+
+@app.post("/api/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: int, request: Request):
+    """Mark a notification as read."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    db = get_db()
+    db.execute("UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?", (notification_id, user["id"]))
+    db.commit()
+    db.close()
+    return {"status": "ok"}
+
+
+@app.post("/api/notifications/read-all")
+async def mark_all_notifications_read(request: Request):
+    """Mark all notifications as read for current user."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    db = get_db()
+    db.execute("UPDATE notifications SET is_read=1 WHERE user_id=?", (user["id"],))
+    db.commit()
+    db.close()
+    return {"status": "ok"}
+
+
+# ==========================================
+# Part 12: SEO Questionnaire Admin Endpoints
+# ==========================================
+
+@app.get("/api/seo-questionnaires")
+async def list_seo_questionnaires(request: Request):
+    """List all submitted SEO questionnaires (admin/sales only)."""
+    user = get_current_user(request)
+    if not user or user["role"] not in ("super_admin", "operations_manager", "sales", "tech_seo", "account_manager"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    db = get_db()
+    try:
+        questionnaires = [dict(r) for r in db.execute(
+            "SELECT * FROM seo_questionnaires ORDER BY created_at DESC LIMIT 100"
+        ).fetchall()]
+        for q in questionnaires:
+            if q.get("answers"):
+                q["answers"] = json.loads(q["answers"])
+    except Exception:
+        questionnaires = []
+    db.close()
+    return {"questionnaires": questionnaires, "total": len(questionnaires)}
+
+
+@app.put("/api/seo-questionnaires/{questionnaire_id}/status")
+async def update_questionnaire_status(questionnaire_id: int, request: Request):
+    """Update questionnaire status (admin/sales only)."""
+    user = get_current_user(request)
+    if not user or user["role"] not in ("super_admin", "operations_manager", "sales", "tech_seo"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    data = await request.json()
+    new_status = data.get("status", "reviewed")
+
+    db = get_db()
+    db.execute("UPDATE seo_questionnaires SET status=?, reviewed_by=?, updated_at=datetime('now') WHERE id=?",
+               (new_status, user["id"], questionnaire_id))
+    db.commit()
+    db.close()
+    return {"status": new_status, "questionnaire_id": questionnaire_id}
+
+
+@app.get("/api/chat/sessions")
+async def list_chat_sessions(request: Request):
+    """List all chat sessions (admin only)."""
+    user = get_current_user(request)
+    if not user or user["role"] not in ("super_admin", "operations_manager", "sales"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    db = get_db()
+    sessions = [dict(r) for r in db.execute(
+        "SELECT id, session_id, visitor_name, visitor_email, visitor_phone, business_name, status, created_at, updated_at FROM chat_messages ORDER BY created_at DESC LIMIT 100"
+    ).fetchall()]
+    db.close()
+    return {"sessions": sessions, "total": len(sessions)}
+
+
+# ==========================================
+# Part 13: Frontend Static Site Serving
 # ==========================================
 
 FRONTEND_DIR = os.environ.get("FRONTEND_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__))))
