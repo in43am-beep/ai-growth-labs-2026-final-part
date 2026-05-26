@@ -155,6 +155,12 @@ async def root(request: Request):
         if user["role"] == "client":
             return RedirectResponse(url="/client-portal")
         return RedirectResponse(url="/dashboard")
+    # Serve frontend index.html for public visitors
+    frontend_dir = os.environ.get("FRONTEND_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__))))
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        from starlette.responses import FileResponse
+        return FileResponse(index_path)
     return RedirectResponse(url="/login")
 
 @app.get("/dashboard", response_class=HTMLResponse)
@@ -3600,6 +3606,49 @@ async def get_voice_call(call_id: int, request: Request):
     return call_dict
 
 
+# ==========================================
+# Part 9: Frontend Static Site Serving
+# ==========================================
+
+FRONTEND_DIR = os.environ.get("FRONTEND_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__))))
+
+if os.path.isdir(FRONTEND_DIR) and os.path.exists(os.path.join(FRONTEND_DIR, "index.html")):
+    from starlette.responses import FileResponse
+
+    # Mount CSS, JS, assets, pages as static dirs
+    for subdir in ("css", "js", "assets", "pages", "site"):
+        subpath = os.path.join(FRONTEND_DIR, subdir)
+        if os.path.isdir(subpath):
+            app.mount(f"/{subdir}", StaticFiles(directory=subpath), name=f"frontend_{subdir}")
+
+    # Serve specific static files at root
+    @app.get("/robots.txt")
+    async def robots_txt():
+        fpath = os.path.join(FRONTEND_DIR, "robots.txt")
+        if os.path.exists(fpath):
+            return FileResponse(fpath)
+        raise HTTPException(status_code=404)
+
+    @app.get("/sitemap.xml")
+    async def sitemap_xml():
+        fpath = os.path.join(FRONTEND_DIR, "sitemap.xml")
+        if os.path.exists(fpath):
+            return FileResponse(fpath, media_type="application/xml")
+        raise HTTPException(status_code=404)
+
+    @app.get("/404.html")
+    async def not_found_page():
+        fpath = os.path.join(FRONTEND_DIR, "404.html")
+        if os.path.exists(fpath):
+            return FileResponse(fpath)
+        raise HTTPException(status_code=404)
+
+    @app.get("/index.html")
+    async def index_html():
+        return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)

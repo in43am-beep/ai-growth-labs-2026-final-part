@@ -5,9 +5,7 @@
 (function() {
   'use strict';
 
-  const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8000'
-    : (window.VOICE_API_URL || 'http://localhost:8000');
+  const API_URL = window.VOICE_API_URL || window.location.origin;
 
   let callId = null;
   let chatHistory = [];

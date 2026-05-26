@@ -1,0 +1,10 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+dashboard/__pycache__
+dashboard/agency.db
+.env
+*.md
+!README.md
+AI_Growth_Labs_Complete_System_Report.pdf
