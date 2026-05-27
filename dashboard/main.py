@@ -294,6 +294,19 @@ async def client_portal(request: Request):
         data["rankings"] = []
         data["approvals"] = []
         data["stats"] = {"total_projects": 0, "total_tasks": 0, "completed_tasks": 0, "completion_pct": 0, "pending_approvals": 0}
+    # Check if client has submitted SEO questionnaire
+    try:
+        q = db.execute("SELECT created_at FROM seo_questionnaires WHERE client_email=? ORDER BY created_at DESC LIMIT 1",
+                        (user["email"],)).fetchone()
+        if q:
+            data["questionnaire_submitted"] = True
+            data["questionnaire_date"] = q["created_at"][:10] if q["created_at"] else ""
+        else:
+            data["questionnaire_submitted"] = False
+            data["questionnaire_date"] = ""
+    except Exception:
+        data["questionnaire_submitted"] = False
+        data["questionnaire_date"] = ""
     db.close()
     return templates.TemplateResponse("client_portal.html", data)
 
@@ -3384,7 +3397,121 @@ async def public_contact(request: Request):
 # Part 8: AI Voice Call API (Gemini-Powered)
 # ==========================================
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBksyupy31G_udlOAfK2YqcVB7lJsq1VDs")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+
+def get_smart_fallback_response(user_message, agent="sarah"):
+    """Smart keyword-based response when Gemini API is unavailable."""
+    msg = user_message.lower()
+    
+    if agent == "sarah":
+        name = "Sarah"
+        if any(w in msg for w in ["seo", "ranking", "rank", "google", "search", "visibility"]):
+            return (
+                f"Great question! Local SEO is one of our strongest areas. We've helped over 500 businesses "
+                f"rank in the Google Map Pack. For a dental clinic like yours, we'd typically start with "
+                f"optimizing your Google Business Profile, building local citations, and implementing "
+                f"a review generation strategy. Would you like me to schedule a free SEO audit so we can "
+                f"identify exactly where you stand and what opportunities exist?"
+            )
+        elif any(w in msg for w in ["reviews", "review", "reputation", "stars", "rating"]):
+            return (
+                f"Reviews are absolutely critical for local businesses! We've generated over 12,000 reviews "
+                f"for our clients. Our reputation management service includes automated review request sequences, "
+                f"professional response management, and sentiment monitoring. Most of our dental clients see "
+                f"a jump to 4.8+ stars within 90 days. Want me to set up a free audit to see your current review profile?"
+            )
+        elif any(w in msg for w in ["price", "cost", "pricing", "package", "budget", "affordable"]):
+            return (
+                f"Our packages start at $497/month for the Starter plan, which includes Local SEO, GBP optimization, "
+                f"and basic review management. Our Growth plan at $997/month adds content creation, social media, "
+                f"and paid advertising management. We don't require long-term contracts — it's month-to-month "
+                f"because we believe our results speak for themselves. Would you like a custom quote based on your specific needs?"
+            )
+        elif any(w in msg for w in ["audit", "free", "analysis", "check"]):
+            return (
+                f"Absolutely! Our free comprehensive SEO audit covers your Google Business Profile, website SEO health, "
+                f"local citations, review profile, and competitive analysis. It takes about 24-48 hours to prepare "
+                f"and we'll walk you through every finding on a strategy call. I just need your business name and "
+                f"website URL to get started. What's your website?"
+            )
+        elif any(w in msg for w in ["map", "maps", "map pack", "local pack"]):
+            return (
+                f"Getting into the Google Map Pack is one of the most impactful things we can do for local businesses! "
+                f"We've achieved #1 Map Pack rankings for dental clinics in competitive markets. The key factors are "
+                f"GBP optimization, consistent NAP citations, review velocity, and local content strategy. "
+                f"Would you like me to check your current Map Pack position and identify what's holding you back?"
+            )
+        elif any(w in msg for w in ["website", "web design", "site", "redesign"]):
+            return (
+                f"We offer modern, conversion-optimized website design specifically for local businesses. "
+                f"Our sites are built for speed, mobile-first, and optimized for local SEO from day one. "
+                f"We've seen clients get up to 185% more leads just from a site redesign. "
+                f"Would you like to see some examples of dental clinic websites we've built?"
+            )
+        elif any(w in msg for w in ["social", "facebook", "instagram", "tiktok"]):
+            return (
+                f"Social media is a great way to build trust and attract new patients! We manage everything from "
+                f"content creation to ad campaigns across Facebook, Instagram, TikTok, and LinkedIn. "
+                f"For dental clinics, we typically see the best results with before/after content, "
+                f"patient testimonials, and educational posts. Want to hear more about our social media packages?"
+            )
+        elif any(w in msg for w in ["thank", "thanks", "bye", "goodbye"]):
+            return (
+                f"It was great chatting with you! Feel free to reach out anytime at +1-800-971-0199 "
+                f"or email us at hello@aigrowthlabs.com. I'll make sure our team follows up with you soon. "
+                f"Have a great day!"
+            )
+        elif any(w in msg for w in ["hi", "hello", "hey"]):
+            return (
+                f"Hi there! Thanks for connecting. I'd love to learn more about your business and see "
+                f"how we can help you grow. What's your biggest challenge right now — is it getting more "
+                f"visibility on Google, generating reviews, or something else?"
+            )
+        else:
+            return (
+                f"That's a great point! At AI Growth Labs, we specialize in helping local businesses like yours "
+                f"grow their online presence. We offer Local SEO, Google Business Profile optimization, "
+                f"reputation management, and paid advertising — all tailored to your specific industry. "
+                f"Would you like me to schedule a free comprehensive audit of your business? "
+                f"It'll give us a clear picture of where you stand and the best opportunities for growth."
+            )
+    else:  # alex (chat agent)
+        if any(w in msg for w in ["seo", "ranking", "rank", "google", "search", "visibility"]):
+            return (
+                f"Hey! SEO is what we do best. We've helped 500+ local businesses improve their search visibility. "
+                f"For your business, I'd recommend starting with a free SEO audit — we'll analyze your Google Business Profile, "
+                f"website health, local citations, and competitive landscape. It takes about 24-48 hours and it's completely free. "
+                f"Would you like to get started?"
+            )
+        elif any(w in msg for w in ["reviews", "review", "reputation", "stars"]):
+            return (
+                f"Reviews make a huge difference! We've helped generate over 12,000 reviews across our client base. "
+                f"Our approach uses ethical, automated email and SMS sequences that encourage happy customers to leave reviews. "
+                f"Most clients see significant improvement within 60-90 days. Want to learn more about our reputation management service?"
+            )
+        elif any(w in msg for w in ["price", "cost", "pricing", "package", "budget"]):
+            return (
+                f"Our packages are designed to fit different business sizes. Starter is $497/month (Local SEO + GBP + Reviews), "
+                f"Growth is $997/month (adds content + social + ads), and Enterprise is $1,997/month (full-service). "
+                f"No long-term contracts — month-to-month. Would you like a custom recommendation based on your goals?"
+            )
+        elif any(w in msg for w in ["thank", "thanks", "bye", "goodbye"]):
+            return (
+                f"You're welcome! Feel free to reach back anytime — we're here to help. You can also call us at "
+                f"+1-800-971-0199 or email hello@aigrowthlabs.com. Have a great day!"
+            )
+        elif any(w in msg for w in ["hi", "hello", "hey"]):
+            return (
+                f"Hey there! Welcome to AI Growth Labs. I'm Alex from the growth team. "
+                f"How can I help you today? Are you looking to improve your Google visibility, "
+                f"get more reviews, or boost your online presence?"
+            )
+        else:
+            return (
+                f"Thanks for sharing that! We work with businesses just like yours to improve their digital presence. "
+                f"Our most popular services include Local SEO, Google Business Profile optimization, and reputation management. "
+                f"Would you like a free audit to see where your business stands and identify growth opportunities?"
+            )
 
 VOICE_AGENT_PERSONA = """You are Sarah, a senior growth consultant at AI Growth Labs.
 You are a real person from the strategy department — never mention AI, chatbot, or automated system.
@@ -3519,11 +3646,7 @@ async def voice_call_message(call_id: int, request: Request):
         ai_response = response.text
 
     except Exception as e:
-        ai_response = (
-            "I apologize, I'm having a brief technical issue. "
-            "Would you like to leave your contact info and we'll have a team member call you back? "
-            "You can also reach us directly at +1-800-971-0199."
-        )
+        ai_response = get_smart_fallback_response(user_message, agent="sarah")
 
     # Update transcript
     db = get_db()
@@ -3732,11 +3855,7 @@ async def chat_message(request: Request):
         )
         ai_response = response.text
     except Exception:
-        ai_response = (
-            "Thanks for your message! Let me look into that for you. "
-            "In the meantime, feel free to call us at +1-800-971-0199 or "
-            "email hello@aigrowthlabs.com for immediate assistance."
-        )
+        ai_response = get_smart_fallback_response(user_message, agent="alex")
 
     # Save to DB
     try:

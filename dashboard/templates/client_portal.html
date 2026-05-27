@@ -5,6 +5,7 @@
 <aside class="sidebar"><div class="sidebar-brand">AI Growth<span>Labs</span></div>
 <nav><div class="nav-section">My Portal</div>
 <a href="/client-portal" class="active">📊 Dashboard</a>
+<a href="#questionnaire-section">📝 SEO Questionnaire</a>
 <a href="#projects-section">📋 Projects</a>
 <a href="#rankings-section">📈 Rankings</a>
 <a href="#reports-section">📄 Reports</a>
@@ -30,6 +31,27 @@
 <div class="stat-card"><div class="stat-label">Completion Rate</div><div class="stat-value">{{ stats.completion_pct }}%</div></div>
 <div class="stat-card"><div class="stat-label">Package</div><div class="stat-value" style="font-size:1rem">{{ client.package or 'Custom' }}</div></div>
 <div class="stat-card"><div class="stat-label">Pending Approvals</div><div class="stat-value orange">{{ stats.pending_approvals }}</div></div>
+</div>
+
+<!-- SEO Questionnaire Section - First Step -->
+<div class="card" id="questionnaire-section" style="border:2px solid rgba(0,212,255,0.3);background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(123,47,255,0.05))">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+<div>
+<h3 style="margin-bottom:8px">📝 Step 1: Complete Your SEO Strategy Questionnaire</h3>
+<p style="color:#94A3B8;font-size:14px;line-height:1.6">Before we begin work on your project, we need to understand your business, goals, and current SEO status. Please complete this questionnaire so our team can build a customized strategy for you.</p>
+</div>
+<div style="text-align:center">
+{% if questionnaire_submitted %}
+<span class="badge badge-completed" style="padding:8px 16px;font-size:14px">✅ Submitted</span>
+<p style="color:#34D399;font-size:12px;margin-top:4px">Submitted on {{ questionnaire_date }}</p>
+{% else %}
+<a href="/pages/client-questionnaire.html" class="btn btn-primary" style="padding:12px 24px;font-size:15px;white-space:nowrap;background:linear-gradient(135deg,#00D4FF,#7B2FFF);border:none;border-radius:8px;color:#fff;text-decoration:none;display:inline-block;font-weight:600">
+📝 Fill Questionnaire Now
+</a>
+<p style="color:#F59E0B;font-size:12px;margin-top:4px">⚠️ Required before work begins</p>
+{% endif %}
+</div>
+</div>
 </div>
 
 <!-- Projects Section -->
