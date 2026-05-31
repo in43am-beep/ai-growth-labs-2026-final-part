@@ -6,3 +6,4 @@ dashboard/agency.db
 dashboard/__pycache__/
 .env
 *.log
+generated/

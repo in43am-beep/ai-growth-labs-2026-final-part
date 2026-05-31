@@ -2,7 +2,13 @@
 """Generate all website pages for RankForge AI"""
 import os
 
-SITE = "/home/ubuntu/repos/ai-seo-agency/site/pages"
+# Portable output path. Writes generated drafts to ./generated/pages so it never
+# clobbers the curated, SEO-optimized pages in ./pages on any system.
+# Override with the GENERATE_PAGES_OUT environment variable if desired.
+SITE = os.environ.get(
+    "GENERATE_PAGES_OUT",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "generated", "pages"),
+)
 
 NAV = '''<nav class="nav" id="nav"><div class="nav-inner"><a href="../" class="nav-logo">RankForge<span>AI</span></a><button class="nav-mobile" id="navToggle" aria-label="Toggle navigation">☰</button><div class="nav-links" id="navLinks"><a href="../">Home</a><div class="nav-dropdown"><a class="dropdown-toggle">Services</a><div class="dropdown-menu"><a href="local-seo.html">Local SEO</a><a href="gbp-optimization.html">GBP Optimization</a><a href="reputation-management.html">Reputation Management</a><a href="ai-seo.html">AI SEO Services</a><a href="paid-advertising.html">Facebook &amp; Google Ads</a><a href="social-media.html">Social Media</a><a href="content-creation.html">Content Creation</a></div></div><div class="nav-dropdown"><a class="dropdown-toggle">Industries</a><div class="dropdown-menu"><a href="seo-for-dentists.html">Dentists</a><a href="seo-for-lawyers.html">Lawyers</a><a href="seo-for-restaurants.html">Restaurants</a><a href="seo-for-plumbers.html">Plumbers</a><a href="seo-for-hvac.html">HVAC</a><a href="seo-for-medical-spas.html">Medical Spas</a></div></div><a href="case-studies.html">Case Studies</a><a href="about.html">About</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="free-audit.html" class="nav-cta">Free Audit →</a></div></div></nav>'''
 
@@ -454,6 +460,9 @@ pages["disclaimer.html"] = page(
 <h2 style="color:#F1F5F9;margin:32px 0 16px">Professional Advice</h2><p>Content on our website is for informational purposes and should not be considered professional business, legal, or financial advice.</p>
 </div></div></section>'''
 )
+
+# Ensure output directory exists (create it if missing)
+os.makedirs(SITE, exist_ok=True)
 
 # Write all pages
 for filename, content in pages.items():
