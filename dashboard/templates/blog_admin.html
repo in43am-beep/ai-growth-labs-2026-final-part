@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Blog Manager — RankForge AI OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<style>
+.blog-table{width:100%;border-collapse:collapse;margin-top:16px}
+.blog-table th,.blog-table td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.blog-table th{color:#94A3B8;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;overflow-y:auto;padding:40px 20px}
+.modal-overlay.open{display:block}
+.modal-box{max-width:720px;margin:0 auto;background:#0f1629;border:1px solid rgba(0,212,255,0.2);border-radius:16px;padding:28px}
+.form-input,.form-textarea,.form-select{width:100%;background:rgba(5,8,16,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:#fff;font-family:inherit;margin-bottom:14px}
+.form-textarea{min-height:160px;resize:vertical}
+.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#CBD5E1}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.badge-published{background:rgba(0,255,136,0.15);color:#00FF88}
+.badge-draft{background:rgba(255,217,61,0.15);color:#FFD93D}
+</style></head><body>
+<aside class="sidebar"><div class="sidebar-brand">RankForge<span>AI</span></div>
+<nav><div class="nav-section">Main</div><a href="/dashboard">📊Dashboard</a>
+<a href="/admin/blog" class="active">📝Blog Manager</a>
+<a href="/settings">⚙️API Settings</a>
+<a href="/analytics">📈Analytics</a>
+<a href="/monitor">📡Team Monitor</a>
+</nav>
+<div class="sidebar-user"><div class="user-avatar">{{ user.full_name[:2]|upper }}</div>
+<div><strong>{{ user.full_name }}</strong><small>{{ user.role }}</small></div></div></aside>
+<main class="main">
+<div class="header-bar"><h1>📝 Blog Manager</h1><span>Create, edit, and publish SEO articles &amp; news</span>
+<div class="header-actions"><a href="/dashboard" class="btn btn-outline">← Dashboard</a>
+<button class="btn btn-primary" onclick="openNew()">+ New Post</button></div></div>
+
+<div class="card">
+<table class="blog-table"><thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Date</th><th>Views</th><th>Actions</th></tr></thead>
+<tbody id="posts-body"><tr><td colspan="6" style="color:#64748B">Loading…</td></tr></tbody></table>
+</div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <h2 id="modal-title" style="margin-bottom:18px">New Post</h2>
+    <input type="hidden" id="post-id">
+    <label class="form-label">Title *</label>
+    <input class="form-input" id="f-title" oninput="autoSlug()">
+    <label class="form-label">Slug</label>
+    <input class="form-input" id="f-slug">
+    <div class="form-grid2">
+      <div><label class="form-label">Category</label>
+        <select class="form-select" id="f-category">
+          <option>SEO Tips</option><option>Local Marketing</option><option>AI Search</option>
+          <option>Case Studies</option><option>Free Guides</option>
+        </select></div>
+      <div><label class="form-label">Status</label>
+        <select class="form-select" id="f-status"><option value="draft">Draft</option><option value="published">Published</option></select></div>
+    </div>
+    <label class="form-label">Featured Image URL</label>
+    <input class="form-input" id="f-image" placeholder="https://...">
+    <label class="form-label">Excerpt (max 150 chars)</label>
+    <input class="form-input" id="f-excerpt" maxlength="150">
+    <label class="form-label">Body (HTML or markdown-style: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;, &lt;strong&gt;)</label>
+    <textarea class="form-textarea" id="f-body"></textarea>
+    <div class="form-grid2">
+      <div><label class="form-label">SEO Title</label><input class="form-input" id="f-seo-title"></div>
+      <div><label class="form-label">Author</label><input class="form-input" id="f-author" value="RankForge AI"></div>
+    </div>
+    <label class="form-label">SEO Description</label>
+    <input class="form-input" id="f-seo-desc">
+    <div class="form-grid2">
+      <div><label class="form-label">Tags (comma separated)</label><input class="form-input" id="f-tags"></div>
+      <div><label class="form-label">Publish Date</label><input class="form-input" id="f-date" type="date"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-primary" onclick="savePost()">Save Post</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+    </div>
+    <div id="modal-msg" style="margin-top:10px;font-size:13px"></div>
+  </div>
+</div>
+
+<script>
+function slugify(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+function autoSlug(){var t=document.getElementById('f-title').value;var s=document.getElementById('f-slug');if(!s.dataset.touched)s.value=slugify(t);}
+document.getElementById('f-slug').addEventListener('input',function(){this.dataset.touched='1';});
+
+function loadPosts(){
+  fetch('/api/blog/admin/posts').then(r=>r.json()).then(d=>{
+    var b=document.getElementById('posts-body');
+    if(!d.posts||!d.posts.length){b.innerHTML='<tr><td colspan="6" style="color:#64748B">No posts yet. Click "New Post" to create one.</td></tr>';return;}
+    b.innerHTML=d.posts.map(p=>`<tr>
+      <td>${p.title}</td><td>${p.category||''}</td>
+      <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      <td>${(p.published_at||p.created_at||'').slice(0,10)}</td><td>${p.views||0}</td>
+      <td><button class="btn btn-sm btn-outline" onclick='editPost(${JSON.stringify(p)})'>Edit</button>
+      <button class="btn btn-sm btn-outline" onclick="delPost(${p.id})">Delete</button></td></tr>`).join('');
+  });
+}
+function openNew(){
+  document.getElementById('modal-title').textContent='New Post';
+  ['post-id','f-title','f-slug','f-image','f-excerpt','f-body','f-seo-title','f-seo-desc','f-tags','f-date'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-author').value='RankForge AI';
+  document.getElementById('f-slug').dataset.touched='';
+  document.getElementById('modal-msg').textContent='';
+  document.getElementById('modal').classList.add('open');
+}
+function editPost(p){
+  document.getElementById('modal-title').textContent='Edit Post';
+  document.getElementById('post-id').value=p.id;
+  document.getElementById('f-title').value=p.title||'';
+  document.getElementById('f-slug').value=p.slug||'';document.getElementById('f-slug').dataset.touched='1';
+  document.getElementById('f-category').value=p.category||'SEO Tips';
+  document.getElementById('f-status').value=p.status||'draft';
+  document.getElementById('f-image').value=p.featured_image||'';
+  document.getElementById('f-excerpt').value=p.excerpt||'';
+  document.getElementById('f-body').value=p.body||'';
+  document.getElementById('f-seo-title').value=p.seo_title||'';
+  document.getElementById('f-seo-desc').value=p.seo_description||'';
+  document.getElementById('f-tags').value=p.tags||'';
+  document.getElementById('f-author').value=p.author||'RankForge AI';
+  document.getElementById('f-date').value=(p.published_at||'').slice(0,10);
+  document.getElementById('modal-msg').textContent='';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function savePost(){
+  var id=document.getElementById('post-id').value;
+  var payload={
+    title:document.getElementById('f-title').value.trim(),
+    slug:document.getElementById('f-slug').value.trim(),
+    category:document.getElementById('f-category').value,
+    status:document.getElementById('f-status').value,
+    featured_image:document.getElementById('f-image').value.trim(),
+    excerpt:document.getElementById('f-excerpt').value.trim(),
+    body:document.getElementById('f-body').value,
+    seo_title:document.getElementById('f-seo-title').value.trim(),
+    seo_description:document.getElementById('f-seo-desc').value.trim(),
+    tags:document.getElementById('f-tags').value.trim(),
+    author:document.getElementById('f-author').value.trim(),
+    publish_date:document.getElementById('f-date').value
+  };
+  if(!payload.title){document.getElementById('modal-msg').textContent='Title is required';document.getElementById('modal-msg').style.color='#F87171';return;}
+  var url=id?('/api/blog/posts/'+id):'/api/blog/posts';
+  fetch(url,{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json().then(d=>({ok:r.ok,d:d}))).then(res=>{
+      if(res.ok){closeModal();loadPosts();}
+      else{document.getElementById('modal-msg').textContent=res.d.error||'Save failed';document.getElementById('modal-msg').style.color='#F87171';}
+    });
+}
+function delPost(id){
+  if(!confirm('Delete this post?'))return;
+  fetch('/api/blog/posts/'+id,{method:'DELETE'}).then(()=>loadPosts());
+}
+loadPosts();
+</script>
+</body></html>

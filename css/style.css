@@ -1780,6 +1780,27 @@ body.page-loading { opacity: 0; }
   .auth-card { padding: 28px 20px; }
 }
 
+/* ============ BLOG FILTERS ============ */
+.blog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.blog-filter {
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 1px solid rgba(0,212,255,0.25);
+  background: transparent;
+  color: #94A3B8;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.blog-filter:hover { color: #fff; border-color: rgba(0,212,255,0.5); }
+.blog-filter.active { background: linear-gradient(135deg, #00D4FF, #7B2FFF); color: #fff; border-color: transparent; }
+
 /* ============ FLOATING CTA (removed) ============ */
 .floating-cta { display: none !important; }
 .sticky-cta-bar { display: none !important; }

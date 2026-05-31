@@ -932,6 +932,21 @@ async def api_blog_list(request: Request):
     db.close()
     return {"posts": [dict(r) for r in rows]}
 
+@app.get("/admin/blog", response_class=HTMLResponse)
+async def admin_blog_page(request: Request):
+    user = get_current_user(request)
+    if not user or user["role"] not in ("super_admin", "operations_manager"):
+        return RedirectResponse(url="/login")
+    return templates.TemplateResponse("blog_admin.html", {"request": request, "user": user})
+
+@app.get("/api/blog/admin/posts")
+async def api_blog_admin_list(request: Request):
+    require_role(request, ["super_admin", "operations_manager"])
+    db = get_db()
+    rows = db.execute("SELECT * FROM blog_posts ORDER BY COALESCE(published_at, created_at) DESC").fetchall()
+    db.close()
+    return {"posts": [dict(r) for r in rows]}
+
 @app.get("/api/blog/posts/{slug}")
 async def api_blog_get(slug: str):
     db = get_db()
@@ -4478,7 +4493,7 @@ if os.path.isdir(FRONTEND_DIR) and os.path.exists(os.path.join(FRONTEND_DIR, "in
     from starlette.responses import FileResponse
 
     # Mount CSS, JS, assets, pages as static dirs
-    for subdir in ("css", "js", "assets", "pages", "site"):
+    for subdir in ("css", "js", "assets", "pages", "site", "data"):
         subpath = os.path.join(FRONTEND_DIR, subdir)
         if os.path.isdir(subpath):
             app.mount(f"/{subdir}", StaticFiles(directory=subpath), name=f"frontend_{subdir}")
