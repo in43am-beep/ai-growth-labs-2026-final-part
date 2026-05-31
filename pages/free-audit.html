@@ -16,6 +16,7 @@
   <meta name="twitter:image" content="https://YOUR_DOMAIN_HERE/assets/images/og-default.jpg">
   <meta property="og:description" content="Get your website analyzed across 100+ ranking factors and 12 DNA pillars — completely free. Real data, not estimates.">
   <meta property="og:title" content="Free SEO DNA Audit | RankForge AI — 100+ Factors Analyzed">
+  <meta name="twitter:title" content="Free SEO DNA Audit | RankForge AI — 100+ Factors Analyzed">
   <meta name="description" content="Get your website analyzed across 100+ ranking factors and 12 DNA pillars — completely free. Real data, not estimates.">
   
   
@@ -111,6 +112,9 @@
     "areaServed": "United States",
     "serviceType": ["Local SEO", "Reputation Management", "AI SEO", "Google Business Profile Optimization", "PPC Advertising", "Social Media Management", "Content Creation", "Video SEO", "Conversion Rate Optimization", "E-Commerce SEO"]
   }
+  </script>
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://YOUR_DOMAIN_HERE/"}, {"@type": "ListItem", "position": 2, "name": "Free SEO DNA Audit", "item": "https://YOUR_DOMAIN_HERE/pages/free-audit.html"}]}
   </script>
 </head>
 <body>
@@ -487,10 +491,10 @@
       <div class="footer-bottom">
         <p>&copy; 2026 RankForge AI. All rights reserved.</p>
         <div class="footer-social">
-          <a href="https://facebook.com/rankforgeai" aria-label="Facebook" target="_blank" rel="noopener">FB</a>
-          <a href="https://instagram.com/rankforgeai" aria-label="Instagram" target="_blank" rel="noopener">IG</a>
-          <a href="https://linkedin.com/company/rankforgeai" aria-label="LinkedIn" target="_blank" rel="noopener">LI</a>
-          <a href="https://tiktok.com/@rankforgeai" aria-label="TikTok" target="_blank" rel="noopener">TK</a>
+          <a href="https://facebook.com/rankforgeai" aria-label="Facebook" target="_blank" rel="noopener noreferrer">FB</a>
+          <a href="https://instagram.com/rankforgeai" aria-label="Instagram" target="_blank" rel="noopener noreferrer">IG</a>
+          <a href="https://linkedin.com/company/rankforgeai" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">LI</a>
+          <a href="https://tiktok.com/@rankforgeai" aria-label="TikTok" target="_blank" rel="noopener noreferrer">TK</a>
         </div>
       </div>
     </div>
@@ -500,9 +504,7 @@
   <script src="../js/form-validation.js"></script>
   <script>
     // Backend API URL — Fly.io permanent deployment
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:8000'
-      : 'https://ai-growth-labs-os-jddtnvip.fly.dev';
+    const API_URL = '';
 
     async function runAudit(e) {
       e.preventDefault();

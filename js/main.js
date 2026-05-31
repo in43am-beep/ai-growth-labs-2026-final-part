@@ -196,4 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // WhatsApp floating button removed — now handled by fab-container in HTML
+
+  // Results ticker: clone items once for a seamless marquee loop (no duplicate markup in HTML source)
+  var tickerInner = document.querySelector('.ticker-inner');
+  if (tickerInner && !tickerInner.dataset.cloned) {
+    tickerInner.innerHTML += tickerInner.innerHTML;
+    tickerInner.dataset.cloned = '1';
+  }
 });
