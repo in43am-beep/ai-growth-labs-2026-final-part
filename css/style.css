@@ -1685,6 +1685,101 @@ img { max-width: 100%; height: auto; display: block; }
 body { opacity: 1; transition: opacity 0.4s ease; }
 body.page-loading { opacity: 0; }
 
+/* ============ AUTH PAGES (signup / login / dashboard) ============ */
+.auth-nav-actions { display: flex; gap: 12px; align-items: center; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(0,212,255,0.4);
+  color: #00D4FF;
+}
+.btn-outline:hover { background: rgba(0,212,255,0.1); }
+.btn-block { width: 100%; justify-content: center; }
+.auth-page {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 20px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 18px;
+  padding: 40px;
+}
+.auth-card h1 { font-size: 1.8rem; margin-bottom: 8px; }
+.auth-sub { color: #94A3B8; margin-bottom: 28px; font-size: 0.95rem; }
+.form-row { margin-bottom: 18px; display: flex; flex-direction: column; }
+.form-row label { font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: #E2E8F0; }
+.form-row .req { color: #F87171; }
+.form-row input, .form-row select {
+  background: rgba(5,8,16,0.6);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  width: 100%;
+}
+.form-row input:focus, .form-row select:focus {
+  outline: none;
+  border-color: #00D4FF;
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.15);
+}
+.form-row input:disabled { opacity: 0.6; cursor: not-allowed; }
+.password-wrap { position: relative; display: flex; align-items: center; }
+.password-wrap input { padding-right: 64px; }
+.pw-toggle {
+  position: absolute; right: 10px;
+  background: none; border: none; color: #00D4FF;
+  font-size: 0.82rem; cursor: pointer; font-weight: 600;
+}
+.pw-strength { height: 5px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 8px; overflow: hidden; }
+.pw-strength span { display: block; height: 100%; width: 0; transition: width 0.3s ease, background 0.3s ease; }
+.pw-score-0, .pw-score-1 { background: #F87171; }
+.pw-score-2 { background: #F59E0B; }
+.pw-score-3 { background: #FBBF24; }
+.pw-score-4 { background: #34D399; }
+.form-check { flex-direction: row; align-items: flex-start; gap: 8px; }
+.form-check label { font-weight: 400; font-size: 0.88rem; color: #94A3B8; display: inline; }
+.form-check input { width: auto; margin-top: 2px; }
+.form-check-row { justify-content: space-between; align-items: center; }
+.forgot-link { color: #00D4FF; font-size: 0.85rem; }
+.auth-divider { text-align: center; margin: 24px 0; position: relative; color: #64748B; font-size: 0.85rem; }
+.auth-divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.1); }
+.auth-divider span { background: #0a0e1a; padding: 0 14px; position: relative; }
+.btn-google {
+  background: #fff; color: #1f2937; display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-google:hover { background: #f1f5f9; }
+.auth-foot { text-align: center; margin-top: 24px; color: #94A3B8; font-size: 0.9rem; }
+.auth-foot a, .auth-divider a { color: #00D4FF; }
+.success-message { color: #34D399; font-size: 0.9rem; }
+
+/* User dashboard */
+.user-dash { padding: 48px 20px 80px; }
+.dash-welcome h1 { font-size: 2rem; margin-bottom: 6px; }
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px; }
+.dash-panel {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 16px;
+  padding: 28px;
+}
+.dash-panel h2 { font-size: 1.25rem; margin-bottom: 18px; }
+.muted { color: #64748B; font-size: 0.9rem; }
+.audit-list .audit-item {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 14px; margin-bottom: 10px;
+}
+@media (max-width: 768px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .auth-card { padding: 28px 20px; }
+}
+
 /* ============ FLOATING CTA (removed) ============ */
 .floating-cta { display: none !important; }
 .sticky-cta-bar { display: none !important; }

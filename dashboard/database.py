@@ -441,12 +441,78 @@ def init_db():
         order_num INTEGER DEFAULT 0
     )''')
     
+    # App/portal users (public customer accounts - signup/login)
+    c.execute('''CREATE TABLE IF NOT EXISTS app_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        phone TEXT,
+        password_hash TEXT NOT NULL,
+        business_name TEXT,
+        website_url TEXT,
+        industry TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        last_login TEXT,
+        is_verified INTEGER DEFAULT 0,
+        verification_token TEXT,
+        reset_token TEXT,
+        reset_token_expiry TEXT
+    )''')
+
+    # Public leads (audit + contact form submissions from website)
+    c.execute('''CREATE TABLE IF NOT EXISTS public_leads (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        lead_type TEXT NOT NULL DEFAULT 'audit',
+        name TEXT,
+        email TEXT,
+        phone TEXT,
+        website TEXT,
+        business_name TEXT,
+        industry TEXT,
+        message TEXT,
+        source TEXT DEFAULT 'website',
+        created_at TEXT DEFAULT (datetime('now'))
+    )''')
+
+    # Blog posts (admin-managed publishing)
+    c.execute('''CREATE TABLE IF NOT EXISTS blog_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        category TEXT,
+        featured_image TEXT,
+        excerpt TEXT,
+        body TEXT,
+        seo_title TEXT,
+        seo_description TEXT,
+        tags TEXT,
+        status TEXT DEFAULT 'draft',
+        author TEXT,
+        published_at TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        views INTEGER DEFAULT 0
+    )''')
+
+    # Blog / guest-post / backlink submissions
+    c.execute('''CREATE TABLE IF NOT EXISTS blog_submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        website_url TEXT,
+        topic TEXT,
+        message TEXT,
+        submission_type TEXT DEFAULT 'roundup',
+        status TEXT DEFAULT 'new',
+        created_at TEXT DEFAULT (datetime('now'))
+    )''')
+
     # Create default super admin
     try:
         admin_hash = bcrypt.hash("admin123")
         c.execute('''INSERT OR IGNORE INTO users (username, password_hash, full_name, email, role, rank, salary) 
                       VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                  ('admin', admin_hash, 'Super Administrator', 'admin@aigrowth-labs.com', 'super_admin', 'director', 0))
+                  ('admin', admin_hash, 'Super Administrator', 'admin@YOUR_DOMAIN_HERE', 'super_admin', 'director', 0))
     except Exception:
         pass
     

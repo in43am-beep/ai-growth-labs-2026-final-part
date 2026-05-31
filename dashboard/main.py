@@ -665,6 +665,348 @@ async def create_audit(request: Request):
     db.close()
     return {"id": audit_id, "message": "Audit created — processing will begin when AI API key is configured"}
 
+# ============================================================
+# PUBLIC USER AUTH (signup / login for website customers)
+# ============================================================
+import re as _re
+
+APP_TOKEN_EXPIRE_DAYS = 7
+_login_attempts = {}  # ip -> [timestamps]
+
+def _valid_email(email: str) -> bool:
+    return bool(email and _re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email))
+
+def create_app_token(user_id: int, email: str):
+    expire = datetime.utcnow() + timedelta(days=APP_TOKEN_EXPIRE_DAYS)
+    return jwt.encode({"sub": str(user_id), "email": email, "scope": "app_user", "exp": expire},
+                      SECRET_KEY, algorithm=ALGORITHM)
+
+def get_app_user(request: Request):
+    """Resolve current app user from Authorization: Bearer <token> header or app_token cookie."""
+    token = None
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        token = auth[7:]
+    if not token:
+        token = request.cookies.get("app_token")
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("scope") != "app_user":
+            return None
+        db = get_db()
+        row = db.execute("SELECT * FROM app_users WHERE id=?", (payload["sub"],)).fetchone()
+        db.close()
+        return dict(row) if row else None
+    except Exception:
+        return None
+
+def notify_admins(db, title, message, ntype="lead"):
+    """Send an in-app notification to all admin/ops users."""
+    try:
+        admins = db.execute("SELECT id FROM users WHERE role IN ('super_admin','operations_manager','sales')").fetchall()
+        for a in admins:
+            db.execute("INSERT INTO notifications (user_id, title, message, type) VALUES (?,?,?,?)",
+                       (a["id"], title, message, ntype))
+    except Exception:
+        pass
+
+@app.post("/api/auth/signup")
+async def api_signup(request: Request):
+    data = await request.json()
+    full_name = (data.get("full_name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or "").strip()
+    password = data.get("password") or ""
+    business_name = (data.get("business_name") or "").strip()
+    if not full_name or not email or not phone or not password:
+        return JSONResponse({"error": "Full name, email, phone and password are required"}, status_code=400)
+    if not _valid_email(email):
+        return JSONResponse({"error": "Please enter a valid email address"}, status_code=400)
+    if len(password) < 8:
+        return JSONResponse({"error": "Password must be at least 8 characters"}, status_code=400)
+    db = get_db()
+    existing = db.execute("SELECT id FROM app_users WHERE email=?", (email,)).fetchone()
+    if existing:
+        db.close()
+        return JSONResponse({"error": "An account with this email already exists"}, status_code=409)
+    c = db.cursor()
+    pwd_hash = bcrypt.hash(password)
+    verify_token = secrets.token_urlsafe(24)
+    c.execute("""INSERT INTO app_users (full_name, email, phone, password_hash, business_name, website_url, industry, verification_token)
+                 VALUES (?,?,?,?,?,?,?,?)""",
+              (full_name, email, phone, pwd_hash, business_name, data.get("website_url"), data.get("industry"), verify_token))
+    uid = c.lastrowid
+    notify_admins(db, "New Account Signup", f"{full_name} ({email}) created an account", "signup")
+    db.commit()
+    db.close()
+    token = create_app_token(uid, email)
+    return {"token": token, "user": {"id": uid, "full_name": full_name, "email": email, "business_name": business_name}}
+
+@app.post("/api/auth/login")
+async def api_login(request: Request):
+    # rate limit: max 5 attempts / 15 min per IP
+    ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    attempts = [t for t in _login_attempts.get(ip, []) if now - t < 900]
+    if len(attempts) >= 5:
+        return JSONResponse({"error": "Too many login attempts. Please try again in 15 minutes."}, status_code=429)
+    data = await request.json()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+    db = get_db()
+    row = db.execute("SELECT * FROM app_users WHERE email=?", (email,)).fetchone()
+    if not row or not bcrypt.verify(password, row["password_hash"]):
+        attempts.append(now)
+        _login_attempts[ip] = attempts
+        db.close()
+        return JSONResponse({"error": "Invalid email or password"}, status_code=401)
+    db.execute("UPDATE app_users SET last_login=datetime('now') WHERE id=?", (row["id"],))
+    db.commit()
+    db.close()
+    _login_attempts[ip] = []
+    token = create_app_token(row["id"], email)
+    return {"token": token, "user": {"id": row["id"], "full_name": row["full_name"], "email": email,
+                                     "business_name": row["business_name"]}}
+
+@app.post("/api/auth/logout")
+async def api_logout():
+    # Stateless JWT — client discards token. Clear cookie if present.
+    resp = JSONResponse({"message": "Logged out"})
+    resp.delete_cookie("app_token")
+    return resp
+
+@app.get("/api/auth/me")
+async def api_me(request: Request):
+    user = get_app_user(request)
+    if not user:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    user.pop("password_hash", None)
+    user.pop("verification_token", None)
+    user.pop("reset_token", None)
+    return {"user": user}
+
+@app.put("/api/auth/update")
+async def api_update_profile(request: Request):
+    user = get_app_user(request)
+    if not user:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    data = await request.json()
+    db = get_db()
+    db.execute("""UPDATE app_users SET full_name=?, phone=?, business_name=?, website_url=?, industry=? WHERE id=?""",
+               (data.get("full_name", user["full_name"]), data.get("phone", user["phone"]),
+                data.get("business_name", user["business_name"]), data.get("website_url", user["website_url"]),
+                data.get("industry", user["industry"]), user["id"]))
+    db.commit()
+    db.close()
+    return {"message": "Profile updated"}
+
+@app.post("/api/auth/forgot-password")
+async def api_forgot_password(request: Request):
+    data = await request.json()
+    email = (data.get("email") or "").strip().lower()
+    db = get_db()
+    row = db.execute("SELECT id FROM app_users WHERE email=?", (email,)).fetchone()
+    if row:
+        token = secrets.token_urlsafe(24)
+        expiry = (datetime.utcnow() + timedelta(hours=1)).isoformat()
+        db.execute("UPDATE app_users SET reset_token=?, reset_token_expiry=? WHERE id=?", (token, expiry, row["id"]))
+        db.commit()
+        # No email service configured — log reset link to console
+        print(f"[PASSWORD RESET] {email} -> token: {token} (expires {expiry})")
+    db.close()
+    # Always return success to avoid email enumeration
+    return {"message": "If an account exists for this email, a reset link has been sent."}
+
+@app.post("/api/auth/reset-password")
+async def api_reset_password(request: Request):
+    data = await request.json()
+    token = data.get("token") or ""
+    new_password = data.get("password") or ""
+    if len(new_password) < 8:
+        return JSONResponse({"error": "Password must be at least 8 characters"}, status_code=400)
+    db = get_db()
+    row = db.execute("SELECT id, reset_token_expiry FROM app_users WHERE reset_token=?", (token,)).fetchone()
+    if not row:
+        db.close()
+        return JSONResponse({"error": "Invalid or expired reset token"}, status_code=400)
+    try:
+        if datetime.fromisoformat(row["reset_token_expiry"]) < datetime.utcnow():
+            db.close()
+            return JSONResponse({"error": "Reset token has expired"}, status_code=400)
+    except Exception:
+        pass
+    db.execute("UPDATE app_users SET password_hash=?, reset_token=NULL, reset_token_expiry=NULL WHERE id=?",
+               (bcrypt.hash(new_password), row["id"]))
+    db.commit()
+    db.close()
+    return {"message": "Password has been reset. You can now log in."}
+
+# ============================================================
+# PUBLIC LEAD CAPTURE (free-audit + contact forms)
+# ============================================================
+@app.post("/api/leads/audit")
+async def api_lead_audit(request: Request):
+    data = await request.json()
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip()
+    if not email or not _valid_email(email):
+        return JSONResponse({"error": "A valid email is required"}, status_code=400)
+    db = get_db()
+    db.execute("""INSERT INTO public_leads (lead_type, name, email, phone, website, business_name, industry, message, source)
+                  VALUES ('audit',?,?,?,?,?,?,?,?)""",
+               (name, email, data.get("phone"), data.get("website"), data.get("business_name"),
+                data.get("industry"), data.get("message"), "free-audit"))
+    # Also create a sales lead for the pipeline
+    try:
+        db.execute("""INSERT INTO sales_leads (business_name, contact_name, email, phone, website, industry, source, status)
+                      VALUES (?,?,?,?,?,?,?,?)""",
+                   (data.get("business_name") or name, name, email, data.get("phone"),
+                    data.get("website"), data.get("industry"), "free_audit", "new"))
+    except Exception:
+        pass
+    notify_admins(db, "New Free Audit Request", f"{name or email} requested a free audit", "lead")
+    db.commit()
+    db.close()
+    return {"message": "Thanks! Your free audit request has been received. We'll be in touch within 24 hours."}
+
+@app.post("/api/leads/contact")
+async def api_lead_contact(request: Request):
+    data = await request.json()
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip()
+    if not email or not _valid_email(email):
+        return JSONResponse({"error": "A valid email is required"}, status_code=400)
+    db = get_db()
+    db.execute("""INSERT INTO public_leads (lead_type, name, email, phone, business_name, message, source)
+                  VALUES ('contact',?,?,?,?,?,?)""",
+               (name, email, data.get("phone"), data.get("business_name"), data.get("message"), "contact-form"))
+    notify_admins(db, "New Contact Message", f"{name or email} sent a message via the contact form", "lead")
+    db.commit()
+    db.close()
+    return {"message": "Thanks for reaching out! We'll reply to your message shortly."}
+
+@app.post("/api/leads/resource-download")
+async def api_resource_download(request: Request):
+    data = await request.json()
+    email = (data.get("email") or "").strip()
+    if not email or not _valid_email(email):
+        return JSONResponse({"error": "A valid email is required"}, status_code=400)
+    db = get_db()
+    db.execute("""INSERT INTO public_leads (lead_type, name, email, message, source)
+                  VALUES ('resource',?,?,?,?)""",
+               (data.get("name"), email, data.get("resource"), "free-resources"))
+    notify_admins(db, "Resource Download", f"{email} downloaded: {data.get('resource','a resource')}", "lead")
+    db.commit()
+    db.close()
+    return {"message": "Success! Your download link is on its way to your inbox."}
+
+@app.post("/api/blog/submit")
+async def api_blog_submit(request: Request):
+    data = await request.json()
+    email = (data.get("email") or "").strip()
+    if not email or not _valid_email(email):
+        return JSONResponse({"error": "A valid email is required"}, status_code=400)
+    db = get_db()
+    db.execute("""INSERT INTO blog_submissions (name, email, website_url, topic, message, submission_type)
+                  VALUES (?,?,?,?,?,?)""",
+               (data.get("name"), email, data.get("website_url"), data.get("topic"),
+                data.get("message"), data.get("submission_type", "roundup")))
+    notify_admins(db, "New Content Submission", f"{data.get('name') or email} submitted a story/guest post", "lead")
+    db.commit()
+    db.close()
+    return {"message": "Thanks for your submission! Our editorial team will review it and get back to you."}
+
+# ============================================================
+# BLOG PUBLISHING API
+# ============================================================
+def _slugify(title: str) -> str:
+    s = _re.sub(r"[^a-z0-9]+", "-", (title or "").lower()).strip("-")
+    return s or secrets.token_hex(4)
+
+@app.get("/api/blog/posts")
+async def api_blog_list(request: Request):
+    db = get_db()
+    rows = db.execute("SELECT * FROM blog_posts WHERE status='published' ORDER BY COALESCE(published_at, created_at) DESC").fetchall()
+    db.close()
+    return {"posts": [dict(r) for r in rows]}
+
+@app.get("/api/blog/posts/{slug}")
+async def api_blog_get(slug: str):
+    db = get_db()
+    row = db.execute("SELECT * FROM blog_posts WHERE slug=?", (slug,)).fetchone()
+    if row:
+        db.execute("UPDATE blog_posts SET views=views+1 WHERE id=?", (row["id"],))
+        db.commit()
+    db.close()
+    if not row:
+        return JSONResponse({"error": "Post not found"}, status_code=404)
+    return {"post": dict(row)}
+
+@app.post("/api/blog/posts")
+async def api_blog_create(request: Request):
+    user = require_role(request, ["super_admin", "operations_manager"])
+    data = await request.json()
+    title = (data.get("title") or "").strip()
+    if not title:
+        return JSONResponse({"error": "Title is required"}, status_code=400)
+    slug = (data.get("slug") or "").strip() or _slugify(title)
+    db = get_db()
+    if db.execute("SELECT id FROM blog_posts WHERE slug=?", (slug,)).fetchone():
+        slug = f"{slug}-{secrets.token_hex(2)}"
+    status = data.get("status", "draft")
+    published_at = data.get("publish_date") or (datetime.utcnow().isoformat() if status == "published" else None)
+    c = db.cursor()
+    c.execute("""INSERT INTO blog_posts (title, slug, category, featured_image, excerpt, body, seo_title,
+                 seo_description, tags, status, author, published_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+              (title, slug, data.get("category"), data.get("featured_image"), data.get("excerpt"),
+               data.get("body"), data.get("seo_title") or title, data.get("seo_description") or data.get("excerpt"),
+               data.get("tags"), status, data.get("author") or user["full_name"], published_at))
+    pid = c.lastrowid
+    db.commit()
+    db.close()
+    return {"id": pid, "slug": slug, "message": "Post created"}
+
+@app.put("/api/blog/posts/{post_id}")
+async def api_blog_update(post_id: int, request: Request):
+    user = require_role(request, ["super_admin", "operations_manager"])
+    data = await request.json()
+    db = get_db()
+    row = db.execute("SELECT * FROM blog_posts WHERE id=?", (post_id,)).fetchone()
+    if not row:
+        db.close()
+        return JSONResponse({"error": "Post not found"}, status_code=404)
+    status = data.get("status", row["status"])
+    published_at = row["published_at"]
+    if status == "published" and not published_at:
+        published_at = datetime.utcnow().isoformat()
+    db.execute("""UPDATE blog_posts SET title=?, slug=?, category=?, featured_image=?, excerpt=?, body=?,
+                  seo_title=?, seo_description=?, tags=?, status=?, author=?, published_at=?, updated_at=datetime('now')
+                  WHERE id=?""",
+               (data.get("title", row["title"]), data.get("slug", row["slug"]), data.get("category", row["category"]),
+                data.get("featured_image", row["featured_image"]), data.get("excerpt", row["excerpt"]),
+                data.get("body", row["body"]), data.get("seo_title", row["seo_title"]),
+                data.get("seo_description", row["seo_description"]), data.get("tags", row["tags"]),
+                status, data.get("author", row["author"]), published_at, post_id))
+    db.commit()
+    db.close()
+    return {"message": "Post updated"}
+
+@app.delete("/api/blog/posts/{post_id}")
+async def api_blog_delete(post_id: int, request: Request):
+    user = require_role(request, ["super_admin", "operations_manager"])
+    db = get_db()
+    db.execute("DELETE FROM blog_posts WHERE id=?", (post_id,))
+    db.commit()
+    db.close()
+    return {"message": "Post deleted"}
+
+# ===== HEALTH CHECK =====
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.post("/api/notifications/{notif_id}/read")
 async def mark_notification_read(notif_id: int, request: Request):
     user = require_auth(request)
