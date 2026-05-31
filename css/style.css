@@ -1780,6 +1780,12 @@ body.page-loading { opacity: 0; }
   .auth-card { padding: 28px 20px; }
 }
 
+/* ============ ACTIVE NAV + PAGE FADE-IN ============ */
+.nav-links a.nav-active { color: var(--color-accent-primary, #00D4FF); }
+.nav-links a.nav-active::after { width: 100%; }
+body { animation: pageFadeIn 0.4s ease both; }
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 /* ============ FREE RESOURCES PAGE ============ */
 .container.narrow { max-width: 720px; }
 .section-alt { background: rgba(255,255,255,0.02); }

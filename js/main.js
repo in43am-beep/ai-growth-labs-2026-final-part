@@ -203,4 +203,50 @@ document.addEventListener('DOMContentLoaded', () => {
     tickerInner.innerHTML += tickerInner.innerHTML;
     tickerInner.dataset.cloned = '1';
   }
+
+  // Active nav state for current page
+  (function () {
+    var current = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.nav-links a, .nav-cta a').forEach(function (a) {
+      var href = (a.getAttribute('href') || '').split('/').pop();
+      if (href && href === current) a.classList.add('nav-active');
+    });
+  })();
+
+  // Cookie consent banner (bottom bar, stored in localStorage)
+  (function () {
+    try {
+      if (localStorage.getItem('rf_cookie_consent')) return;
+    } catch (e) { return; }
+    var bar = document.createElement('div');
+    bar.className = 'cookie-consent';
+    bar.setAttribute('role', 'dialog');
+    bar.setAttribute('aria-label', 'Cookie consent');
+    bar.innerHTML = '<p>We use cookies to improve your experience and analyze site traffic. By continuing, you agree to our use of cookies.</p>' +
+      '<div class="cookie-actions">' +
+      '<button class="cookie-decline" type="button">Decline</button>' +
+      '<button class="cookie-accept" type="button">Accept</button></div>';
+    document.body.appendChild(bar);
+    function close(choice) {
+      try { localStorage.setItem('rf_cookie_consent', choice); } catch (e) {}
+      bar.remove();
+    }
+    bar.querySelector('.cookie-accept').addEventListener('click', function () { close('accepted'); });
+    bar.querySelector('.cookie-decline').addEventListener('click', function () { close('declined'); });
+  })();
+
+  // Global toast helper
+  window.RFToast = function (message, type) {
+    var container = document.querySelector('.toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + (type || 'success');
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(function () { toast.style.opacity = '0'; setTimeout(function () { toast.remove(); }, 300); }, 3500);
+  };
 });
