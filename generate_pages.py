@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generate all website pages for AI Growth Labs"""
+"""Generate all website pages for RankForge AI"""
 import os
 
 SITE = "/home/ubuntu/repos/ai-seo-agency/site/pages"
 
-NAV = '''<nav class="nav" id="nav"><div class="nav-inner"><a href="../" class="nav-logo">AI Growth<span>Labs</span></a><button class="nav-mobile" id="navToggle" aria-label="Toggle navigation">☰</button><div class="nav-links" id="navLinks"><a href="../">Home</a><div class="nav-dropdown"><a class="dropdown-toggle">Services</a><div class="dropdown-menu"><a href="local-seo.html">Local SEO</a><a href="gbp-optimization.html">GBP Optimization</a><a href="reputation-management.html">Reputation Management</a><a href="ai-seo.html">AI SEO Services</a><a href="paid-advertising.html">Facebook &amp; Google Ads</a><a href="social-media.html">Social Media</a><a href="content-creation.html">Content Creation</a></div></div><div class="nav-dropdown"><a class="dropdown-toggle">Industries</a><div class="dropdown-menu"><a href="seo-for-dentists.html">Dentists</a><a href="seo-for-lawyers.html">Lawyers</a><a href="seo-for-restaurants.html">Restaurants</a><a href="seo-for-plumbers.html">Plumbers</a><a href="seo-for-hvac.html">HVAC</a><a href="seo-for-medical-spas.html">Medical Spas</a></div></div><a href="case-studies.html">Case Studies</a><a href="about.html">About</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="free-audit.html" class="nav-cta">Free Audit →</a></div></div></nav>'''
+NAV = '''<nav class="nav" id="nav"><div class="nav-inner"><a href="../" class="nav-logo">RankForge<span>AI</span></a><button class="nav-mobile" id="navToggle" aria-label="Toggle navigation">☰</button><div class="nav-links" id="navLinks"><a href="../">Home</a><div class="nav-dropdown"><a class="dropdown-toggle">Services</a><div class="dropdown-menu"><a href="local-seo.html">Local SEO</a><a href="gbp-optimization.html">GBP Optimization</a><a href="reputation-management.html">Reputation Management</a><a href="ai-seo.html">AI SEO Services</a><a href="paid-advertising.html">Facebook &amp; Google Ads</a><a href="social-media.html">Social Media</a><a href="content-creation.html">Content Creation</a></div></div><div class="nav-dropdown"><a class="dropdown-toggle">Industries</a><div class="dropdown-menu"><a href="seo-for-dentists.html">Dentists</a><a href="seo-for-lawyers.html">Lawyers</a><a href="seo-for-restaurants.html">Restaurants</a><a href="seo-for-plumbers.html">Plumbers</a><a href="seo-for-hvac.html">HVAC</a><a href="seo-for-medical-spas.html">Medical Spas</a></div></div><a href="case-studies.html">Case Studies</a><a href="about.html">About</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="free-audit.html" class="nav-cta">Free Audit →</a></div></div></nav>'''
 
-FOOTER = '''<footer class="footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="logo">AI Growth<span>Labs</span></div><p>AI-powered SEO &amp; reputation management for USA businesses.</p></div><div class="footer-col"><h4>Services</h4><a href="local-seo.html">Local SEO</a><a href="gbp-optimization.html">GBP Optimization</a><a href="reputation-management.html">Reputation Management</a><a href="ai-seo.html">AI SEO</a><a href="paid-advertising.html">Paid Ads</a><a href="social-media.html">Social Media</a><a href="content-creation.html">Content Creation</a></div><div class="footer-col"><h4>Industries</h4><a href="seo-for-dentists.html">Dentists</a><a href="seo-for-lawyers.html">Lawyers</a><a href="seo-for-restaurants.html">Restaurants</a><a href="seo-for-plumbers.html">Plumbers</a><a href="seo-for-hvac.html">HVAC</a><a href="seo-for-medical-spas.html">Medical Spas</a></div><div class="footer-col"><h4>Company</h4><a href="about.html">About</a><a href="case-studies.html">Case Studies</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="free-audit.html">Free Audit</a><a href="privacy-policy.html">Privacy</a><a href="terms.html">Terms</a></div></div><div class="footer-bottom"><span>© 2026 AI Growth Labs. All rights reserved.</span><span>🇺🇸 Serving USA businesses</span></div></div></footer>'''
+FOOTER = '''<footer class="footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="logo">RankForge<span>AI</span></div><p>AI-powered SEO &amp; reputation management for USA businesses.</p></div><div class="footer-col"><h4>Services</h4><a href="local-seo.html">Local SEO</a><a href="gbp-optimization.html">GBP Optimization</a><a href="reputation-management.html">Reputation Management</a><a href="ai-seo.html">AI SEO</a><a href="paid-advertising.html">Paid Ads</a><a href="social-media.html">Social Media</a><a href="content-creation.html">Content Creation</a></div><div class="footer-col"><h4>Industries</h4><a href="seo-for-dentists.html">Dentists</a><a href="seo-for-lawyers.html">Lawyers</a><a href="seo-for-restaurants.html">Restaurants</a><a href="seo-for-plumbers.html">Plumbers</a><a href="seo-for-hvac.html">HVAC</a><a href="seo-for-medical-spas.html">Medical Spas</a></div><div class="footer-col"><h4>Company</h4><a href="about.html">About</a><a href="case-studies.html">Case Studies</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="free-audit.html">Free Audit</a><a href="privacy-policy.html">Privacy</a><a href="terms.html">Terms</a></div></div><div class="footer-bottom"><span>© 2026 RankForge AI. All rights reserved.</span><span>🇺🇸 Serving USA businesses</span></div></div></footer>'''
 
 CHATBOT = '''<div class="floating-cta"><a href="free-audit.html" class="float-btn float-audit">📊 Free Audit</a><button class="float-btn float-chat" id="chatToggle">💬 Chat</button></div>
 <div class="chatbot-container" id="chatbot"><div class="chat-header"><div class="chat-header-info"><div class="chat-avatar">💬</div><div><h4>AI Growth Assistant</h4><p>Online</p></div></div><button class="chat-close" id="chatClose">✕</button></div><div class="chat-messages" id="chatMessages"></div><div class="chat-input-area"><input type="text" class="chat-input" id="chatInput" placeholder="Type your message..."><button class="chat-send" id="chatSend">→</button></div></div>
@@ -17,7 +17,7 @@ def page(title, desc, keywords, body):
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title} | AI Growth Labs</title>
+<title>{title} | RankForge AI</title>
 <meta name="description" content="{desc}">
 <meta name="keywords" content="{keywords}">
 <link rel="stylesheet" href="../css/main.css">
@@ -268,14 +268,14 @@ for n in niches:
 
 # ===== ABOUT PAGE =====
 pages["about.html"] = page(
-    "About AI Growth Labs — Our Team & Mission",
-    "Meet the AI Growth Labs team. Learn about our mission to help USA local businesses grow through AI-powered SEO and digital marketing.",
-    "about AI Growth Labs, SEO agency team, digital marketing experts, USA SEO company",
+    "About RankForge AI — Our Team & Mission",
+    "Meet the RankForge AI team. Learn about our mission to help USA local businesses grow through AI-powered SEO and digital marketing.",
+    "about RankForge AI, SEO agency team, digital marketing experts, USA SEO company",
     '''<section class="page-hero"><div class="container"><span class="section-badge">About Us</span><h1>AI-Powered Growth for USA Local Businesses</h1><p>We combine cutting-edge AI technology with proven SEO strategies to help local businesses dominate their market.</p></div></section>
 <section class="section section-darker"><div class="container">
 <div style="max-width:800px;margin:0 auto">
 <h2 class="section-title mb-24">Our Mission</h2>
-<p style="font-size:1.1rem;line-height:1.8;color:#CBD5E1;margin-bottom:32px">At AI Growth Labs, we believe every local business deserves access to enterprise-level SEO intelligence. Our DNA-level analysis goes deeper than any traditional SEO audit — examining 100+ ranking factors across 12 pillars to find opportunities that others miss.</p>
+<p style="font-size:1.1rem;line-height:1.8;color:#CBD5E1;margin-bottom:32px">At RankForge AI, we believe every local business deserves access to enterprise-level SEO intelligence. Our DNA-level analysis goes deeper than any traditional SEO audit — examining 100+ ranking factors across 12 pillars to find opportunities that others miss.</p>
 <p style="font-size:1.1rem;line-height:1.8;color:#CBD5E1;margin-bottom:32px">Founded in 2024, we've helped over 500 USA local businesses increase their Google visibility, generate more reviews, and grow their customer base. Our month-to-month contracts and transparent reporting ensure we earn your trust every single month.</p>
 <h2 class="section-title mb-24" style="margin-top:60px">Why Choose Us</h2>
 <div class="services-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
@@ -303,9 +303,9 @@ pages["about.html"] = page(
 
 # ===== CONTACT PAGE =====
 pages["contact.html"] = page(
-    "Contact AI Growth Labs — Get Your Free Strategy Call",
-    "Contact AI Growth Labs for a free SEO strategy call. Reach our team for questions about local SEO, reputation management, and digital marketing.",
-    "contact AI Growth Labs, free SEO consultation, SEO strategy call, digital marketing inquiry",
+    "Contact RankForge AI — Get Your Free Strategy Call",
+    "Contact RankForge AI for a free SEO strategy call. Reach our team for questions about local SEO, reputation management, and digital marketing.",
+    "contact RankForge AI, free SEO consultation, SEO strategy call, digital marketing inquiry",
     '''<section class="page-hero"><div class="container"><span class="section-badge">📞 Contact Us</span><h1>Let's Grow Your Business Together</h1><p>Ready to dominate your local market? Get in touch for a free strategy call — no pressure, just actionable advice.</p></div></section>
 <section class="section section-darker"><div class="container">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start">
@@ -341,7 +341,7 @@ pages["contact.html"] = page(
 # ===== CASE STUDIES =====
 pages["case-studies.html"] = page(
     "Case Studies — Real Results for Real Businesses",
-    "See real SEO results from AI Growth Labs clients. Case studies showing traffic increases, lead generation, and revenue growth for USA local businesses.",
+    "See real SEO results from RankForge AI clients. Case studies showing traffic increases, lead generation, and revenue growth for USA local businesses.",
     "SEO case studies, local business results, SEO success stories, digital marketing results",
     '''<section class="page-hero"><div class="container"><span class="section-badge">📊 Case Studies</span><h1>Real Results for Real Businesses</h1><p>See how we've helped USA local businesses increase visibility, generate leads, and grow revenue with our AI-powered approach.</p></div></section>
 <section class="section section-darker"><div class="container"><div class="cases-grid">
@@ -358,7 +358,7 @@ pages["case-studies.html"] = page(
 # ===== BLOG =====
 pages["blog.html"] = page(
     "Blog — SEO Tips, Digital Marketing Insights & Growth Strategies",
-    "Expert SEO tips, local marketing strategies, and digital growth insights from AI Growth Labs. Learn how to rank higher and grow your business.",
+    "Expert SEO tips, local marketing strategies, and digital growth insights from RankForge AI. Learn how to rank higher and grow your business.",
     "SEO blog, digital marketing tips, local SEO strategies, Google ranking tips, business growth blog",
     '''<section class="page-hero"><div class="container"><span class="section-badge">📝 Blog</span><h1>SEO Tips & Growth Strategies</h1><p>Expert insights, actionable tips, and proven strategies to help your business grow online.</p></div></section>
 <section class="section section-darker"><div class="container"><div class="services-grid">
@@ -414,7 +414,7 @@ pages["free-audit.html"] = page(
 # ===== LEGAL PAGES =====
 pages["privacy-policy.html"] = page(
     "Privacy Policy",
-    "AI Growth Labs privacy policy. Learn how we collect, use, and protect your personal information.",
+    "RankForge AI privacy policy. Learn how we collect, use, and protect your personal information.",
     "privacy policy, data protection, personal information",
     '''<section class="page-hero"><div class="container"><h1>Privacy Policy</h1><p>Last updated: January 2026</p></div></section>
 <section class="section section-darker"><div class="container"><div style="max-width:800px;margin:0 auto;color:#CBD5E1;line-height:1.8">
@@ -429,11 +429,11 @@ pages["privacy-policy.html"] = page(
 
 pages["terms.html"] = page(
     "Terms & Conditions",
-    "AI Growth Labs terms and conditions of service. Read our service agreement, payment terms, and policies.",
+    "RankForge AI terms and conditions of service. Read our service agreement, payment terms, and policies.",
     "terms and conditions, service agreement, terms of service",
     '''<section class="page-hero"><div class="container"><h1>Terms & Conditions</h1><p>Last updated: January 2026</p></div></section>
 <section class="section section-darker"><div class="container"><div style="max-width:800px;margin:0 auto;color:#CBD5E1;line-height:1.8">
-<h2 style="color:#F1F5F9;margin:32px 0 16px">Service Agreement</h2><p>By engaging AI Growth Labs for SEO and digital marketing services, you agree to these terms. Our services are provided on a month-to-month basis unless otherwise specified in a custom agreement.</p>
+<h2 style="color:#F1F5F9;margin:32px 0 16px">Service Agreement</h2><p>By engaging RankForge AI for SEO and digital marketing services, you agree to these terms. Our services are provided on a month-to-month basis unless otherwise specified in a custom agreement.</p>
 <h2 style="color:#F1F5F9;margin:32px 0 16px">Payment Terms</h2><p>Services are billed monthly in advance. Payment is due upon receipt of invoice. We accept major credit cards and bank transfers. Late payments may result in service suspension after 15 days notice.</p>
 <h2 style="color:#F1F5F9;margin:32px 0 16px">No Guarantees</h2><p>While we use proven strategies and best practices, we cannot guarantee specific search engine rankings. SEO results depend on many factors including competition, industry, and search engine algorithms. We guarantee transparent work, regular reporting, and adherence to Google's guidelines.</p>
 <h2 style="color:#F1F5F9;margin:32px 0 16px">Cancellation</h2><p>Either party may cancel services with 30 days written notice. We recommend a minimum 3-6 month engagement for meaningful SEO results, but you are never locked into a long-term contract.</p>
@@ -444,12 +444,12 @@ pages["terms.html"] = page(
 
 pages["disclaimer.html"] = page(
     "Disclaimer",
-    "AI Growth Labs disclaimer. Important information about our SEO services, results, and claims.",
+    "RankForge AI disclaimer. Important information about our SEO services, results, and claims.",
     "disclaimer, SEO disclaimer, results disclaimer",
     '''<section class="page-hero"><div class="container"><h1>Disclaimer</h1><p>Last updated: January 2026</p></div></section>
 <section class="section section-darker"><div class="container"><div style="max-width:800px;margin:0 auto;color:#CBD5E1;line-height:1.8">
 <h2 style="color:#F1F5F9;margin:32px 0 16px">Results Disclaimer</h2><p>The results and statistics mentioned on our website, case studies, and marketing materials are based on actual client results. However, individual results may vary. Past performance does not guarantee future results. SEO timelines, ranking improvements, and lead generation outcomes depend on many factors including competition, industry, location, and search engine algorithm updates.</p>
-<h2 style="color:#F1F5F9;margin:32px 0 16px">No Ranking Guarantees</h2><p>AI Growth Labs does not guarantee #1 rankings on Google or any search engine. No ethical SEO company can make such guarantees. We guarantee our work ethic, transparency, and commitment to using best practices.</p>
+<h2 style="color:#F1F5F9;margin:32px 0 16px">No Ranking Guarantees</h2><p>RankForge AI does not guarantee #1 rankings on Google or any search engine. No ethical SEO company can make such guarantees. We guarantee our work ethic, transparency, and commitment to using best practices.</p>
 <h2 style="color:#F1F5F9;margin:32px 0 16px">Third-Party Tools</h2><p>We use various third-party tools and platforms in delivering our services. We are not responsible for changes to third-party tools, APIs, or platforms that may affect service delivery.</p>
 <h2 style="color:#F1F5F9;margin:32px 0 16px">Professional Advice</h2><p>Content on our website is for informational purposes and should not be considered professional business, legal, or financial advice.</p>
 </div></div></section>'''

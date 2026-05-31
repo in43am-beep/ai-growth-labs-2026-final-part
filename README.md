@@ -1,8 +1,8 @@
-# AI Growth Labs — AI-Powered Local SEO Agency Website
+# RankForge AI — AI-Powered Local SEO Agency Website
 
 > Full-stack digital marketing agency website with static frontend (38+ pages) and FastAPI backend dashboard.
 
-**Live Site:** https://ai-growth-labs-part2-final-rdmstqlw.devinapps.com  
+**Live Site:** https://YOUR_DOMAIN_HERE  
 **Branch:** `devin/1778433837-ai-seo-agency-website`
 
 ---

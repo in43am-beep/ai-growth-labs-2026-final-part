@@ -1,3 +1,8 @@
-__pycache__/\n*.pyc\n*.db\n*.sqlite3
+__pycache__/
+*.pyc
+*.db
+*.sqlite3
 dashboard/agency.db
 dashboard/__pycache__/
+.env
+*.log

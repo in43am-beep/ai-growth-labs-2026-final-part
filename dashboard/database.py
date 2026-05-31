@@ -746,7 +746,7 @@ def _insert_demo_data(c):
             ('twilio', None, 0, json.dumps({"account_sid": "", "auth_token": "", "phone_number": "", "voice_url": "/api/voice/incoming"})),
             ('stripe', None, 0, json.dumps({"publishable_key": "", "webhook_secret": "", "currency": "usd"})),
             ('whatsapp', None, 0, json.dumps({"phone_number_id": "", "business_account_id": "", "api_version": "v17.0"})),
-            ('slack', None, 0, json.dumps({"webhook_url": "", "channel": "#notifications", "bot_name": "AI Growth Labs"})),
+            ('slack', None, 0, json.dumps({"webhook_url": "", "channel": "#notifications", "bot_name": "RankForge AI"})),
             ('google_search_console', None, 0, json.dumps({"client_id": "", "client_secret": "", "refresh_token": "", "property_url": ""})),
         ]
         for provider, key, active, config in api_settings:

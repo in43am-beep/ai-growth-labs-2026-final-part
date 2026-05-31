@@ -1,5 +1,5 @@
 /**
- * AI Growth Labs — Form Validation & Rate Limiting
+ * RankForge AI — Form Validation & Rate Limiting
  * - International phone number validation (country-specific digit counts)
  * - Email validation (format + disposable domain blocking)
  * - Rate limiting: max 3 submissions per form per 24 hours (per browser)

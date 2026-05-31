@@ -1,4 +1,4 @@
-# API Integration Guide — AI Growth Labs OS
+# API Integration Guide — RankForge AI OS
 
 ## Overview
 The system uses **9 API integrations**. All work in **demo mode** without API keys (returns realistic mock data). Add real API keys to go live.

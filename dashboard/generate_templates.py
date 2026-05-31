@@ -11,10 +11,10 @@ def base_start(title, role_label, sidebar_items):
         sidebar_html += f'<a href="{href}"{cls}>{icon}{label}</a>\n'
     
     return f'''<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{title} — AI Growth Labs OS</title>
+<title>{title} — RankForge AI OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/dashboard.css"></head><body>
-<aside class="sidebar"><div class="sidebar-brand">AI Growth<span>Labs</span></div>
+<aside class="sidebar"><div class="sidebar-brand">RankForge<span>AI</span></div>
 <nav><div class="nav-section">Main</div>{sidebar_html}</nav>
 <div class="sidebar-user"><div class="user-avatar">{{{{ user.full_name[:2]|upper }}}}</div>
 <div><strong>{{{{ user.full_name }}}}</strong><small>{role_label}</small></div></div></aside>

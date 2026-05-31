@@ -1,4 +1,4 @@
-# AI Growth Labs — Progress Log
+# RankForge AI — Progress Log
 
 ## Session: May 15, 2026
 
@@ -21,7 +21,7 @@
 
 ### Completed — Expert Analysis Fixes:
 - [x] Schema serviceType updated on ALL 25 pages to include all 10 services (was missing Content Creation, Video SEO, CRO, E-Commerce SEO)
-- [x] Canonical URL on index.html fixed (was `/`, now `https://aigrowthabs.com/`)
+- [x] Canonical URL on index.html fixed (was `/`, now `https://YOUR_DOMAIN_HERE/`)
 - [x] requirements.txt updated with AI/integration packages: anthropic, openai, google-generativeai, stripe, twilio, apscheduler
 
 ### Not Completed — Expert Analysis Major Features (Need Dedicated Sessions):

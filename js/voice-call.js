@@ -1,5 +1,5 @@
 /**
- * Call Support Widget — AI Growth Labs
+ * Call Support Widget — RankForge AI
  * Floating call button + chat interface for customer support
  */
 (function() {

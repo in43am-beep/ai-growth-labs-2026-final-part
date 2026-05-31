@@ -1,10 +1,10 @@
-# AI Growth Labs — Feasibility Report
+# RankForge AI — Feasibility Report
 ## Adding Missing Services & Features (Based on WebFX Competitive Analysis)
 
 **Date:** May 2026  
 **Status:** Planning Phase  
 **Competitor Analyzed:** WebFX (webfx.com) — 750+ employees, 30+ years, $10B+ revenue for clients  
-**Our Site:** AI Growth Labs — Local SEO agency, 10 services, 12 industries
+**Our Site:** RankForge AI — Local SEO agency, 10 services, 12 industries
 
 ---
 

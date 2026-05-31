@@ -1,4 +1,4 @@
-# AI Growth Labs — Complete Project Tree & Code Documentation
+# RankForge AI — Complete Project Tree & Code Documentation
 
 > **PURPOSE:** Complete project structure, every file explained, every function documented,
 > every database table described, and every API endpoint listed.

@@ -1,7 +1,7 @@
-# AI Growth Labs — On-Page SEO Audit Report
+# RankForge AI — On-Page SEO Audit Report
 **Date:** May 15, 2026
 **Pages Audited:** 32
-**Base URL:** https://aigrowthabs.com
+**Base URL:** https://YOUR_DOMAIN_HERE
 
 ## Summary Score Card
 
@@ -46,7 +46,7 @@
 ## Detailed Page Analysis
 
 ### 404.html
-- **Title:** Page Not Found | AI Growth Labs
+- **Title:** Page Not Found | RankForge AI
 - **Word Count:** 255
 - **Headings:** H1=1, H2=1, H3=3
 - **Links:** Internal=51, External=0, Dead=6
@@ -60,7 +60,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/404.html
+  - Canonical: https://YOUR_DOMAIN_HERE/404.html
   - Charset present
   - Viewport present
   - H1 OK: 'Page Not Found'
@@ -82,7 +82,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/
+  - Canonical: https://YOUR_DOMAIN_HERE/
   - Charset present
   - Viewport present
   - H1 OK: 'Grow Your Local Business With AI SEO & Reputation '
@@ -90,7 +90,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/about.html
-- **Title:** About Us | AI Growth Labs - AI SEO & Reputation Management
+- **Title:** About Us | RankForge AI - AI SEO & Reputation Management
 - **Word Count:** 619
 - **Headings:** H1=1, H2=2, H3=6
 - **Links:** Internal=48, External=0, Dead=6
@@ -104,15 +104,15 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/about.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/about.html
   - Charset present
   - Viewport present
-  - H1 OK: 'About AI Growth Labs'
+  - H1 OK: 'About RankForge AI'
   - H2 tags: 2
   - Schema markup: 1 block(s)
 
 ### pages/ai-seo.html
-- **Title:** AI SEO Services 2026 | ChatGPT & Gemini Optimization | AI Growth Labs
+- **Title:** AI SEO Services 2026 | ChatGPT & Gemini Optimization | RankForge AI
 - **Word Count:** 610
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -126,7 +126,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/ai-seo.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/ai-seo.html
   - Charset present
   - Viewport present
   - H1 OK: 'AI SEO Services 2026'
@@ -134,7 +134,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog.html
-- **Title:** Blog | SEO Tips & Local Marketing Strategies | AI Growth Labs
+- **Title:** Blog | SEO Tips & Local Marketing Strategies | RankForge AI
 - **Word Count:** 478
 - **Headings:** H1=1, H2=1, H3=6
 - **Links:** Internal=53, External=0, Dead=6
@@ -148,7 +148,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO Blog'
@@ -156,7 +156,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog/ai-seo-chatgpt-citations-2026.html
-- **Title:** AI SEO in 2026: How to Get Cited by ChatGPT | AI Growth Labs
+- **Title:** AI SEO in 2026: How to Get Cited by ChatGPT | RankForge AI
 - **Word Count:** 853
 - **Headings:** H1=1, H2=4, H3=7
 - **Links:** Internal=51, External=0, Dead=6
@@ -170,7 +170,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog/ai-seo-chatgpt-citations-2026.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog/ai-seo-chatgpt-citations-2026.html
   - Charset present
   - Viewport present
   - H1 OK: 'AI SEO in 2026: How to Get Cited by ChatGPT'
@@ -178,7 +178,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog/dentists-google-maps-2026.html
-- **Title:** How Dentists Can Rank #1 on Google Maps in 2026 | AI Growth Labs
+- **Title:** How Dentists Can Rank #1 on Google Maps in 2026 | RankForge AI
 - **Word Count:** 949
 - **Headings:** H1=1, H2=9, H3=0
 - **Links:** Internal=51, External=0, Dead=6
@@ -192,7 +192,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog/dentists-google-maps-2026.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog/dentists-google-maps-2026.html
   - Charset present
   - Viewport present
   - H1 OK: 'How Dentists Can Rank #1 on Google Maps in 2026'
@@ -200,7 +200,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog/ethical-review-generation-guide.html
-- **Title:** Ethical Review Generation: The Complete Guide | AI Growth Labs
+- **Title:** Ethical Review Generation: The Complete Guide | RankForge AI
 - **Word Count:** 902
 - **Headings:** H1=1, H2=6, H3=9
 - **Links:** Internal=53, External=0, Dead=6
@@ -214,7 +214,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog/ethical-review-generation-guide.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog/ethical-review-generation-guide.html
   - Charset present
   - Viewport present
   - H1 OK: 'Ethical Review Generation: The Complete Guide'
@@ -222,7 +222,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog/gbp-optimization-guide-2026.html
-- **Title:** Google Business Profile Optimization Guide 2026 | AI Growth Labs
+- **Title:** Google Business Profile Optimization Guide 2026 | RankForge AI
 - **Word Count:** 830
 - **Headings:** H1=1, H2=4, H3=9
 - **Links:** Internal=51, External=0, Dead=6
@@ -236,7 +236,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog/gbp-optimization-guide-2026.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog/gbp-optimization-guide-2026.html
   - Charset present
   - Viewport present
   - H1 OK: 'Google Business Profile Optimization Guide 2026'
@@ -244,7 +244,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog/lawyers-more-leads-google.html
-- **Title:** How Lawyers Get More Leads From Google in 2026 | AI Growth Labs
+- **Title:** How Lawyers Get More Leads From Google in 2026 | RankForge AI
 - **Word Count:** 789
 - **Headings:** H1=1, H2=8, H3=0
 - **Links:** Internal=50, External=0, Dead=6
@@ -258,7 +258,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog/lawyers-more-leads-google.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog/lawyers-more-leads-google.html
   - Charset present
   - Viewport present
   - H1 OK: 'How Lawyers Get More Leads From Google'
@@ -266,7 +266,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/blog/restaurant-local-seo-2026.html
-- **Title:** Best Local SEO Strategies for Restaurants in 2026 | AI Growth Labs
+- **Title:** Best Local SEO Strategies for Restaurants in 2026 | RankForge AI
 - **Word Count:** 764
 - **Headings:** H1=1, H2=7, H3=0
 - **Links:** Internal=50, External=0, Dead=6
@@ -280,7 +280,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/blog/restaurant-local-seo-2026.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/blog/restaurant-local-seo-2026.html
   - Charset present
   - Viewport present
   - H1 OK: 'Best Local SEO Strategies for Restaurants in 2026'
@@ -288,7 +288,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/case-studies.html
-- **Title:** Case Studies | Real Results for Local Businesses | AI Growth Labs
+- **Title:** Case Studies | Real Results for Local Businesses | RankForge AI
 - **Word Count:** 556
 - **Headings:** H1=1, H2=1, H3=6
 - **Links:** Internal=47, External=0, Dead=6
@@ -302,7 +302,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/case-studies.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/case-studies.html
   - Charset present
   - Viewport present
   - H1 OK: 'Case Studies'
@@ -310,7 +310,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/contact.html
-- **Title:** Contact Us | AI Growth Labs - Get Your Free Strategy Call
+- **Title:** Contact Us | RankForge AI - Get Your Free Strategy Call
 - **Word Count:** 375
 - **Headings:** H1=1, H2=2, H3=1
 - **Links:** Internal=47, External=0, Dead=6
@@ -324,7 +324,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/contact.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/contact.html
   - Charset present
   - Viewport present
   - H1 OK: 'Contact Us'
@@ -332,7 +332,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/content-creation.html
-- **Title:** Content Creation Services | SEO Blogs & Video Scripts | AI Growth Labs
+- **Title:** Content Creation Services | SEO Blogs & Video Scripts | RankForge AI
 - **Word Count:** 545
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -346,7 +346,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/content-creation.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/content-creation.html
   - Charset present
   - Viewport present
   - H1 OK: 'Content Creation'
@@ -354,7 +354,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/cro.html
-- **Title:** Conversion Rate Optimization (CRO) | AI Growth Labs
+- **Title:** Conversion Rate Optimization (CRO) | RankForge AI
 - **Word Count:** 524
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -368,7 +368,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/cro.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/cro.html
   - Charset present
   - Viewport present
   - H1 OK: 'Conversion Rate Optimization'
@@ -376,13 +376,13 @@
   - Schema markup: 1 block(s)
 
 ### pages/disclaimer.html
-- **Title:** Disclaimer | AI Growth Labs
+- **Title:** Disclaimer | RankForge AI
 - **Word Count:** 518
 - **Headings:** H1=1, H2=8, H3=0
 - **Links:** Internal=46, External=0, Dead=6
 - **Images:** 0, Schema: 1
 - **Warnings:**
-  - Title too short (27 chars): 'Disclaimer | AI Growth Labs'
+  - Title too short (27 chars): 'Disclaimer | RankForge AI'
   - Dead/placeholder links (#): 6
 - **Good:**
   - Meta description OK (108 chars)
@@ -390,7 +390,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/disclaimer.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/disclaimer.html
   - Charset present
   - Viewport present
   - H1 OK: 'Disclaimer'
@@ -398,7 +398,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/ecommerce-seo.html
-- **Title:** E-Commerce SEO Services | Product & Category Optimization | AI Growth Labs
+- **Title:** E-Commerce SEO Services | Product & Category Optimization | RankForge AI
 - **Word Count:** 543
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -412,7 +412,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/ecommerce-seo.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/ecommerce-seo.html
   - Charset present
   - Viewport present
   - H1 OK: 'E-Commerce SEO Services'
@@ -420,7 +420,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/free-audit.html
-- **Title:** Free Google Business Audit | AI Growth Labs
+- **Title:** Free Google Business Audit | RankForge AI
 - **Word Count:** 1154
 - **Headings:** H1=1, H2=2, H3=4
 - **Links:** Internal=47, External=0, Dead=6
@@ -434,7 +434,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/free-audit.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/free-audit.html
   - Charset present
   - Viewport present
   - H1 OK: 'Free Google Business Audit'
@@ -442,7 +442,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/gbp-optimization.html
-- **Title:** Google Business Profile Optimization | GBP Management | AI Growth Labs
+- **Title:** Google Business Profile Optimization | GBP Management | RankForge AI
 - **Word Count:** 567
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -456,7 +456,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/gbp-optimization.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/gbp-optimization.html
   - Charset present
   - Viewport present
   - H1 OK: 'Google Business Profile Optimization'
@@ -464,7 +464,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/local-seo.html
-- **Title:** Local SEO Services USA | Google Maps Ranking | AI Growth Labs
+- **Title:** Local SEO Services USA | Google Maps Ranking | RankForge AI
 - **Word Count:** 660
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -478,7 +478,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/local-seo.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/local-seo.html
   - Charset present
   - Viewport present
   - H1 OK: 'Local SEO Services USA'
@@ -486,7 +486,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/paid-advertising.html
-- **Title:** Facebook & Google Ads | Lead Generation Ads | AI Growth Labs
+- **Title:** Facebook & Google Ads | Lead Generation Ads | RankForge AI
 - **Word Count:** 547
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -500,7 +500,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/paid-advertising.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/paid-advertising.html
   - Charset present
   - Viewport present
   - H1 OK: 'Facebook & Google Ads'
@@ -508,7 +508,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/privacy-policy.html
-- **Title:** Privacy Policy | AI Growth Labs
+- **Title:** Privacy Policy | RankForge AI
 - **Word Count:** 562
 - **Headings:** H1=1, H2=10, H3=0
 - **Links:** Internal=46, External=0, Dead=6
@@ -522,7 +522,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/privacy-policy.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/privacy-policy.html
   - Charset present
   - Viewport present
   - H1 OK: 'Privacy Policy'
@@ -530,7 +530,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/reputation-management.html
-- **Title:** Reputation Management Services | Review Generation | AI Growth Labs
+- **Title:** Reputation Management Services | Review Generation | RankForge AI
 - **Word Count:** 645
 - **Headings:** H1=1, H2=2, H3=2
 - **Links:** Internal=53, External=0, Dead=7
@@ -544,7 +544,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/reputation-management.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/reputation-management.html
   - Charset present
   - Viewport present
   - H1 OK: 'Reputation Management'
@@ -552,7 +552,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/seo-for-dentists.html
-- **Title:** SEO for Dentists | Dental Practice Marketing | AI Growth Labs
+- **Title:** SEO for Dentists | Dental Practice Marketing | RankForge AI
 - **Word Count:** 603
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=50, External=0, Dead=7
@@ -566,7 +566,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/seo-for-dentists.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/seo-for-dentists.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO for Dentists'
@@ -574,7 +574,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/seo-for-hvac.html
-- **Title:** SEO for HVAC Companies | Heating & Cooling SEO | AI Growth Labs
+- **Title:** SEO for HVAC Companies | Heating & Cooling SEO | RankForge AI
 - **Word Count:** 542
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -588,7 +588,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/seo-for-hvac.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/seo-for-hvac.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO for HVAC Companies'
@@ -596,7 +596,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/seo-for-lawyers.html
-- **Title:** SEO for Lawyers | Law Firm Marketing | AI Growth Labs
+- **Title:** SEO for Lawyers | Law Firm Marketing | RankForge AI
 - **Word Count:** 496
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=50, External=0, Dead=7
@@ -610,7 +610,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/seo-for-lawyers.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/seo-for-lawyers.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO for Lawyers'
@@ -618,7 +618,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/seo-for-medical-spas.html
-- **Title:** SEO for Medical Spas & Med Spas | Aesthetic Marketing | AI Growth Labs
+- **Title:** SEO for Medical Spas & Med Spas | Aesthetic Marketing | RankForge AI
 - **Word Count:** 565
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -632,7 +632,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/seo-for-medical-spas.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/seo-for-medical-spas.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO for Medical Spas'
@@ -640,7 +640,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/seo-for-plumbers.html
-- **Title:** SEO for Plumbers | Plumbing Company Marketing | AI Growth Labs
+- **Title:** SEO for Plumbers | Plumbing Company Marketing | RankForge AI
 - **Word Count:** 504
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=50, External=0, Dead=7
@@ -654,7 +654,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/seo-for-plumbers.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/seo-for-plumbers.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO for Plumbers'
@@ -662,7 +662,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/seo-for-restaurants.html
-- **Title:** SEO for Restaurants | Restaurant Marketing | AI Growth Labs
+- **Title:** SEO for Restaurants | Restaurant Marketing | RankForge AI
 - **Word Count:** 472
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=50, External=0, Dead=7
@@ -676,7 +676,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/seo-for-restaurants.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/seo-for-restaurants.html
   - Charset present
   - Viewport present
   - H1 OK: 'SEO for Restaurants'
@@ -684,7 +684,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/social-media.html
-- **Title:** Social Media Management | Instagram, Facebook, TikTok | AI Growth Labs
+- **Title:** Social Media Management | Instagram, Facebook, TikTok | RankForge AI
 - **Word Count:** 495
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -698,7 +698,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/social-media.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/social-media.html
   - Charset present
   - Viewport present
   - H1 OK: 'Social Media Management'
@@ -706,7 +706,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/terms.html
-- **Title:** Terms & Conditions | AI Growth Labs
+- **Title:** Terms & Conditions | RankForge AI
 - **Word Count:** 574
 - **Headings:** H1=1, H2=11, H3=0
 - **Links:** Internal=46, External=0, Dead=6
@@ -720,7 +720,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/terms.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/terms.html
   - Charset present
   - Viewport present
   - H1 OK: 'Terms & Conditions'
@@ -728,7 +728,7 @@
   - Schema markup: 1 block(s)
 
 ### pages/video-seo.html
-- **Title:** Video SEO & YouTube Marketing | AI Growth Labs
+- **Title:** Video SEO & YouTube Marketing | RankForge AI
 - **Word Count:** 513
 - **Headings:** H1=1, H2=2, H3=0
 - **Links:** Internal=53, External=0, Dead=7
@@ -742,7 +742,7 @@
   - og:title present
   - og:description present
   - og:type present
-  - Canonical: https://aigrowthabs.com/pages/video-seo.html
+  - Canonical: https://YOUR_DOMAIN_HERE/pages/video-seo.html
   - Charset present
   - Viewport present
   - H1 OK: 'Video SEO & YouTube Marketing'

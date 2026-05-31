@@ -1,4 +1,4 @@
-# AI Growth Labs — Complete Deployment Guide
+# RankForge AI — Complete Deployment Guide
 
 ## OPTION 1: cPanel / Shared Hosting (Frontend Website Only)
 
@@ -129,7 +129,7 @@ curl http://localhost:8000/login
 ```bash
 cat > /etc/systemd/system/aigrowth-dashboard.service << 'EOF'
 [Unit]
-Description=AI Growth Labs Dashboard
+Description=RankForge AI Dashboard
 After=network.target
 
 [Service]

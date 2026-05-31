@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AI Growth Labs - Complete System Report Generator
+RankForge AI - Complete System Report Generator
 Generates a comprehensive PDF with charts, tables, and system documentation
 """
 from reportlab.lib.pagesizes import A4
@@ -93,7 +93,7 @@ def build_report():
 
     # ===================== COVER PAGE =====================
     elements.append(Spacer(1, 80))
-    elements.append(Paragraph("AI Growth Labs", ParagraphStyle('CoverTitle', parent=title_style,
+    elements.append(Paragraph("RankForge AI", ParagraphStyle('CoverTitle', parent=title_style,
                                fontSize=42, alignment=TA_CENTER, textColor=CYAN)))
     elements.append(Paragraph("Agency Operating System", ParagraphStyle('CoverSub', parent=title_style,
                                fontSize=24, alignment=TA_CENTER, textColor=colors.HexColor("#334155"))))
@@ -105,7 +105,7 @@ def build_report():
     elements.append(Spacer(1, 40))
 
     cover_data = [
-        ["Document", "AI Growth Labs - Complete System Report"],
+        ["Document", "RankForge AI - Complete System Report"],
         ["Version", "2.0 Final"],
         ["Date", datetime.datetime.now().strftime("%B %d, %Y")],
         ["Pages", "55+ Frontend | 99+ API Endpoints | 22+ Database Tables"],
@@ -144,7 +144,7 @@ def build_report():
     # ===================== 1. SYSTEM OVERVIEW =====================
     section_header("1. System Overview & Architecture", "🏗️")
 
-    elements.append(Paragraph("AI Growth Labs is a complete agency operating system built for SEO/digital marketing agencies. "
+    elements.append(Paragraph("RankForge AI is a complete agency operating system built for SEO/digital marketing agencies. "
                                "It provides end-to-end management of clients, projects, tasks, billing, team performance, "
                                "and automated SEO auditing with real website crawling.", body))
     elements.append(Spacer(1, 8))
@@ -497,15 +497,15 @@ def build_report():
 
     brand_data = [
         ["What to Change", "Where to Change It", "Files to Edit"],
-        ["Company Name\n'AI Growth Labs'", "All 55+ HTML pages\n(header, footer, title tags)", "Find & replace 'AI Growth Labs'\nin all files under pages/ and index.html"],
+        ["Company Name\n'RankForge AI'", "All 55+ HTML pages\n(header, footer, title tags)", "Find & replace 'RankForge AI'\nin all files under pages/ and index.html"],
         ["Phone Number\n+1 (800) 971-0199", "All 55+ HTML pages\n(header, footer, contact)", "Find & replace the phone number\nin all HTML files"],
-        ["Email Address\nhello@aigrowthlabs.com", "All 55+ HTML pages\n(footer, contact page)", "Find & replace the email\nin all HTML files"],
+        ["Email Address\nhello@YOUR_DOMAIN_HERE", "All 55+ HTML pages\n(footer, contact page)", "Find & replace the email\nin all HTML files"],
         ["Logo / Brand Colors", "CSS file and HTML headers", "Edit css/styles.css\nChange #06B6D4 (cyan) to your color"],
         ["Social Media URLs", "All page footers", "Replace facebook/instagram/linkedin/\ntiktok URLs in all files"],
-        ["Domain Name", "OG tags, canonical URLs,\nschema markup", "Replace aigrowthlabs.com\nwith your domain"],
+        ["Domain Name", "OG tags, canonical URLs,\nschema markup", "Replace YOUR_DOMAIN_HERE\nwith your domain"],
         ["GA4 Tracking ID\nG-XXXXXXXXXX", "index.html\n(head section)", "Replace G-XXXXXXXXXX with\nyour Google Analytics ID"],
         ["Tawk.to Widget", "index.html\n(before </body>)", "Replace YOUR_PROPERTY_ID\nwith your Tawk.to IDs"],
-        ["Calendly Link", "Contact page\n(booking section)", "Replace calendly.com/aigrowthlabs\nwith your Calendly URL"],
+        ["Calendly Link", "Contact page\n(booking section)", "Replace calendly.com/rankforgeai\nwith your Calendly URL"],
         ["Team Photos", "About page\n(team section)", "Replace placeholder initials\nwith real team photo URLs"],
         ["WhatsApp Number", "All page footers\n(floating button)", "Replace 18009710199\nwith your WhatsApp number"],
         ["Dashboard Branding", "Sidebar header in\nall dashboard templates", "Edit templates/*.html\nchange 'AI GrowthLabs'"],
@@ -569,7 +569,7 @@ def build_report():
 
     checklist = [
         ["#", "Step", "Priority", "Time Est.", "Notes"],
-        ["1", "Replace company name in all files", "Critical", "30 min", "Find & replace 'AI Growth Labs' → your brand"],
+        ["1", "Replace company name in all files", "Critical", "30 min", "Find & replace 'RankForge AI' → your brand"],
         ["2", "Replace phone + email in all pages", "Critical", "15 min", "Find & replace in all 55+ HTML files"],
         ["3", "Replace social media URLs", "High", "10 min", "Facebook, Instagram, LinkedIn, TikTok"],
         ["4", "Add real GA4 tracking ID", "High", "5 min", "Replace G-XXXXXXXXXX in index.html"],
@@ -660,7 +660,7 @@ def build_report():
     section_header("Summary", "📋")
 
     elements.append(Paragraph("""
-    <b>AI Growth Labs Agency Operating System</b> is a complete, production-ready platform for running an SEO/digital marketing agency.
+    <b>RankForge AI Agency Operating System</b> is a complete, production-ready platform for running an SEO/digital marketing agency.
     <br/><br/>
     <b>What's Included:</b><br/>
     • 55+ frontend pages with responsive design, dark theme, and real contact/audit forms<br/>
@@ -686,7 +686,7 @@ def build_report():
     """, body))
 
     elements.append(Spacer(1, 20))
-    elements.append(Paragraph("Generated by AI Growth Labs System | " + datetime.datetime.now().strftime("%B %d, %Y"),
+    elements.append(Paragraph("Generated by RankForge AI System | " + datetime.datetime.now().strftime("%B %d, %Y"),
                                ParagraphStyle('Footer', parent=center, fontSize=8, textColor=GRAY)))
 
     # Build

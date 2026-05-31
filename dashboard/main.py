@@ -1,4 +1,4 @@
-"""AI Growth Labs — Agency Operating System Dashboard v3"""
+"""RankForge AI — Agency Operating System Dashboard v3"""
 import os
 import json
 import secrets
@@ -21,7 +21,7 @@ from passlib.hash import bcrypt
 
 from database import get_db, init_db
 
-app = FastAPI(title="AI Growth Labs OS", docs_url=None, redoc_url=None)
+app = FastAPI(title="RankForge AI OS", docs_url=None, redoc_url=None)
 
 # CORS — allow frontend to call API from any origin (for demo/dev)
 app.add_middleware(
@@ -877,7 +877,7 @@ th{{background:#f7f9fc;font-weight:600}}.stat-grid{{display:grid;grid-template-c
 .badge-progress{{background:#dbeafe;color:#2563eb}}.footer{{margin-top:40px;padding-top:20px;border-top:2px solid #eee;text-align:center;color:#999;font-size:12px}}
 @media print{{body{{padding:20px}}.header{{break-after:avoid}}}}
 </style></head><body>
-<div class="header"><h1>AI Growth Labs — Client Report</h1><p>{report['title']}</p><p>Generated: {rdata.get('generated_at','')[:10]} | By: {rdata.get('generated_by','System')}</p></div>
+<div class="header"><h1>RankForge AI — Client Report</h1><p>{report['title']}</p><p>Generated: {rdata.get('generated_at','')[:10]} | By: {rdata.get('generated_by','System')}</p></div>
 <div class="stat-grid">
 <div class="stat-card"><div class="num">{len(projects)}</div><div class="label">Active Projects</div></div>
 <div class="stat-card"><div class="num">{completed_tasks}/{total_tasks}</div><div class="label">Tasks Completed</div></div>
@@ -904,7 +904,7 @@ th{{background:#f7f9fc;font-weight:600}}.stat-grid{{display:grid;grid-template-c
         badge = "badge-paid" if pay.get("status") == "paid" else "badge-pending"
         html += f'<tr><td>{pay.get("invoice_number","")}</td><td>${pay.get("amount",0):,.0f}</td><td>{pay.get("due_date","")}</td><td><span class="badge {badge}">{pay.get("status","")}</span></td></tr>'
     html += f"""</tbody></table></div>
-<div class="footer"><p>AI Growth Labs | AI-Powered SEO &amp; Reputation Management Agency</p><p>This report is confidential and prepared exclusively for {client.get('business_name','')}.</p></div>
+<div class="footer"><p>RankForge AI | AI-Powered SEO &amp; Reputation Management Agency</p><p>This report is confidential and prepared exclusively for {client.get('business_name','')}.</p></div>
 </body></html>"""
     
     return HTMLResponse(content=html)
@@ -1163,7 +1163,7 @@ td{{padding:12px;border-bottom:1px solid #eee;font-size:14px}}.text-right{{text-
 .footer{{margin-top:40px;padding-top:20px;border-top:1px solid #eee;text-align:center;color:#999;font-size:12px}}
 @media print{{body{{padding:20px}}}}
 </style></head><body>
-<div class="inv-header"><div><div class="inv-logo">AI Growth<span>Labs</span></div><p style="color:#64748b;font-size:13px">AI-Powered SEO & Reputation Management</p></div><div class="inv-title">INVOICE</div></div>
+<div class="inv-header"><div><div class="inv-logo">RankForge<span>AI</span></div><p style="color:#64748b;font-size:13px">AI-Powered SEO & Reputation Management</p></div><div class="inv-title">INVOICE</div></div>
 <div class="inv-meta"><div><h4>Bill To</h4><p><strong>{inv.get('business_name','')}</strong></p><p>{inv.get('contact_name','')}</p><p>{inv.get('client_email','')}</p><p>{inv.get('client_phone','')}</p><p>{inv.get('client_location','')}</p></div>
 <div style="text-align:right"><h4>Invoice Details</h4><p><strong>Invoice #:</strong> {inv['invoice_number']}</p><p><strong>Issue Date:</strong> {inv.get('issue_date','')}</p><p><strong>Due Date:</strong> {inv.get('due_date','')}</p><p><strong>Status:</strong> <span class="badge badge-{inv['status']}">{inv['status'].upper()}</span></p></div></div>
 <table><thead><tr><th>Description</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Amount</th></tr></thead><tbody>"""
@@ -1173,7 +1173,7 @@ td{{padding:12px;border-bottom:1px solid #eee;font-size:14px}}.text-right{{text-
 <div class="totals"><div>Subtotal: ${inv['subtotal']:,.2f}</div><div>Tax ({inv['tax_rate']}%): ${inv['tax_amount']:,.2f}</div><div class="total">Total: ${inv['total']:,.2f}</div></div>"""
     if inv.get("notes"):
         html += f'<div style="margin-top:30px;background:#f8fafc;padding:16px;border-radius:8px"><h4 style="font-size:13px;color:#64748b;margin-bottom:6px">Notes</h4><p style="font-size:14px">{inv["notes"]}</p></div>'
-    html += '<div class="footer"><p>AI Growth Labs | Thank you for your business!</p></div></body></html>'
+    html += '<div class="footer"><p>RankForge AI | Thank you for your business!</p></div></body></html>'
     return HTMLResponse(content=html)
 
 # ===== FILE UPLOADS =====
@@ -1396,7 +1396,7 @@ async def generate_white_label_report(request: Request):
     rankings = [dict(r) for r in db.execute("SELECT * FROM keyword_rankings WHERE client_id=? ORDER BY tracked_date DESC LIMIT 20", (client_id,)).fetchall()]
     locations = [dict(r) for r in db.execute("SELECT * FROM client_locations WHERE client_id=?", (client_id,)).fetchall()]
     
-    agency_name = data.get("agency_name", "AI Growth Labs")
+    agency_name = data.get("agency_name", "RankForge AI")
     agency_tagline = data.get("agency_tagline", "AI-Powered SEO & Reputation Management")
     primary_color = data.get("primary_color", "#0A1628")
     accent_color = data.get("accent_color", "#00D4FF")
@@ -1435,7 +1435,7 @@ async def download_white_label_report(report_id: int, request: Request):
     rankings = rdata.get("rankings", [])
     branding = rdata.get("branding", {})
     
-    agency = branding.get("agency_name", "AI Growth Labs")
+    agency = branding.get("agency_name", "RankForge AI")
     tagline = branding.get("tagline", "AI-Powered SEO & Reputation Management")
     pc = branding.get("primary_color", "#0A1628")
     ac = branding.get("accent_color", "#00D4FF")
@@ -1525,7 +1525,7 @@ async def send_email(request: Request):
     
     try:
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = data.get("subject", "AI Growth Labs Report")
+        msg["Subject"] = data.get("subject", "RankForge AI Report")
         msg["From"] = config.get("from_email", smtp["api_key"])
         msg["To"] = data["to_email"]
         
@@ -1583,7 +1583,7 @@ async def email_report(report_id: int, request: Request):
         msg["From"] = smtp_conf.get("from_email", dict(smtp)["api_key"])
         msg["To"] = to_email
         
-        text = f"Hi,\n\nPlease find your latest SEO performance report attached.\n\nReport: {report['title']}\nGenerated: {rdata.get('generated_at','')[:10]}\n\nPlease log in to your client portal to view full details.\n\nBest regards,\nAI Growth Labs Team"
+        text = f"Hi,\n\nPlease find your latest SEO performance report attached.\n\nReport: {report['title']}\nGenerated: {rdata.get('generated_at','')[:10]}\n\nPlease log in to your client portal to view full details.\n\nBest regards,\nRankForge AI Team"
         msg.attach(MIMEText(text, "plain"))
         
         host = smtp_conf.get("host", "smtp.gmail.com")
@@ -1970,7 +1970,7 @@ td{{padding:10px 12px;border-bottom:1px solid #eee;font-size:13px}}
 @media print{{body{{padding:20px}}}}
 </style></head><body>
 <div class="inv-header"><div><h1>INVOICE</h1><p class="inv-num">{inv['invoice_number']}</p></div>
-<div style="text-align:right"><h2 style="color:#0A1628">AI Growth Labs</h2><p style="color:#666;font-size:13px">AI-Powered SEO & Reputation Management</p>
+<div style="text-align:right"><h2 style="color:#0A1628">RankForge AI</h2><p style="color:#666;font-size:13px">AI-Powered SEO & Reputation Management</p>
 <span class="badge badge-{inv['status']}">{inv['status'].upper()}</span></div></div>
 <div class="inv-meta"><div><h3>Bill To</h3><p><strong>{inv.get('business_name','')}</strong></p><p>{inv.get('contact_name','')}</p><p>{inv.get('email','')}</p><p>{inv.get('phone','')}</p></div>
 <div style="text-align:right"><h3>Invoice Details</h3><p>Issue Date: <strong>{inv['issue_date']}</strong></p><p>Due Date: <strong>{inv['due_date']}</strong></p>
@@ -1981,7 +1981,7 @@ td{{padding:10px 12px;border-bottom:1px solid #eee;font-size:13px}}
 {"<div class='total-row'><span>Tax (" + str(inv['tax_rate']) + "%):</span><span>$" + f"{inv['tax_amount']:,.2f}" + "</span></div>" if inv.get('tax_amount') else ""}
 <div class="total-row grand-total"><span>Total:</span><span>${inv['total']:,.2f}</span></div></div>
 {f"<p style='margin-top:20px;color:#666;font-size:13px'>Notes: {inv['notes']}</p>" if inv.get('notes') else ''}
-<div class="footer"><p>AI Growth Labs | Thank you for your business!</p><p>Questions? Contact us at billing@aigrowth-labs.com</p></div>
+<div class="footer"><p>RankForge AI | Thank you for your business!</p><p>Questions? Contact us at billing@aigrowth-labs.com</p></div>
 </body></html>"""
     return HTMLResponse(content=html)
 
@@ -2186,11 +2186,11 @@ async def voice_incoming(request: Request):
     # PRODUCTION: Replace with real Twilio TwiML
     # from twilio.twiml.voice_response import VoiceResponse
     # response = VoiceResponse()
-    # response.say("Thank you for calling AI Growth Labs...")
+    # response.say("Thank you for calling RankForge AI...")
     # response.gather(num_digits=1, action="/api/voice/menu")
     twiml = """<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Say voice="alice">Thank you for calling AI Growth Labs, your AI-powered SEO and digital marketing partner.</Say>
+    <Say voice="alice">Thank you for calling RankForge AI, your AI-powered SEO and digital marketing partner.</Say>
     <Gather numDigits="1" action="/api/voice/menu" method="POST">
         <Say voice="alice">Press 1 for a free SEO audit. Press 2 to speak with our sales team. Press 3 for existing client support.</Say>
     </Gather>
@@ -2311,7 +2311,7 @@ async def slack_send_notification(request: Request):
         # PRODUCTION: Real Slack webhook
         # import requests as req
         # webhook_url = config.get("webhook_url", api["api_key"])
-        # payload = {"channel": channel, "username": config.get("bot_name", "AI Growth Labs"), "text": message, "icon_emoji": ":chart_with_upwards_trend:"}
+        # payload = {"channel": channel, "username": config.get("bot_name", "RankForge AI"), "text": message, "icon_emoji": ":chart_with_upwards_trend:"}
         # req.post(webhook_url, json=payload)
         log_activity(db, user["id"], "slack_notification", f"Slack → {channel}: {message[:50]}...", "system", 0)
         db.commit()
@@ -2433,7 +2433,7 @@ async def create_subscription(request: Request):
         # import stripe
         # stripe.api_key = api["api_key"]
         # customer = stripe.Customer.create(email=data.get("email"), name=data.get("name"))
-        # price = stripe.Price.create(unit_amount=amount*100, currency="usd", recurring={"interval": "month"}, product_data={"name": f"AI Growth Labs - {plan.title()} Plan"})
+        # price = stripe.Price.create(unit_amount=amount*100, currency="usd", recurring={"interval": "month"}, product_data={"name": f"RankForge AI - {plan.title()} Plan"})
         # subscription = stripe.Subscription.create(customer=customer.id, items=[{"price": price.id}])
         pass
     
@@ -2616,7 +2616,7 @@ def _real_crawl_audit(url, business_name, industry, city):
     import re, ssl, socket
 
     results = {"crawled": True, "url": url}
-    headers = {"User-Agent": "AIGrowthLabs-AuditBot/1.0 (+https://ai-growth-labs-new-gpehlojv.devinapps.com)"}
+    headers = {"User-Agent": "RankForgeAI-AuditBot/1.0 (+https://YOUR_DOMAIN_HERE)"}
 
     # ---- Fetch homepage ----
     try:
@@ -3458,7 +3458,7 @@ def get_smart_fallback_response(user_message, agent="sarah"):
         elif any(w in msg for w in ["thank", "thanks", "bye", "goodbye"]):
             return (
                 f"It was great chatting with you! Feel free to reach out anytime at +1-800-971-0199 "
-                f"or email us at hello@aigrowthlabs.com. I'll make sure our team follows up with you soon. "
+                f"or email us at hello@YOUR_DOMAIN_HERE I'll make sure our team follows up with you soon. "
                 f"Have a great day!"
             )
         elif any(w in msg for w in ["hi", "hello", "hey"]):
@@ -3469,7 +3469,7 @@ def get_smart_fallback_response(user_message, agent="sarah"):
             )
         else:
             return (
-                f"That's a great point! At AI Growth Labs, we specialize in helping local businesses like yours "
+                f"That's a great point! At RankForge AI, we specialize in helping local businesses like yours "
                 f"grow their online presence. We offer Local SEO, Google Business Profile optimization, "
                 f"reputation management, and paid advertising — all tailored to your specific industry. "
                 f"Would you like me to schedule a free comprehensive audit of your business? "
@@ -3498,11 +3498,11 @@ def get_smart_fallback_response(user_message, agent="sarah"):
         elif any(w in msg for w in ["thank", "thanks", "bye", "goodbye"]):
             return (
                 f"You're welcome! Feel free to reach back anytime — we're here to help. You can also call us at "
-                f"+1-800-971-0199 or email hello@aigrowthlabs.com. Have a great day!"
+                f"+1-800-971-0199 or email hello@YOUR_DOMAIN_HERE Have a great day!"
             )
         elif any(w in msg for w in ["hi", "hello", "hey"]):
             return (
-                f"Hey there! Welcome to AI Growth Labs. I'm Alex from the growth team. "
+                f"Hey there! Welcome to RankForge AI. I'm Alex from the growth team. "
                 f"How can I help you today? Are you looking to improve your Google visibility, "
                 f"get more reviews, or boost your online presence?"
             )
@@ -3513,7 +3513,7 @@ def get_smart_fallback_response(user_message, agent="sarah"):
                 f"Would you like a free audit to see where your business stands and identify growth opportunities?"
             )
 
-VOICE_AGENT_PERSONA = """You are Sarah, a senior growth consultant at AI Growth Labs.
+VOICE_AGENT_PERSONA = """You are Sarah, a senior growth consultant at RankForge AI.
 You are a real person from the strategy department — never mention AI, chatbot, or automated system.
 Talk naturally like a human support representative. Use casual professional tone.
 
@@ -3527,7 +3527,7 @@ Your role:
 - Never say "I'm an AI" or "as an AI" — you are Sarah from the growth team
 - If asked if you're a bot, say "No, I'm Sarah from the growth consulting team"
 
-Key facts about AI Growth Labs:
+Key facts about RankForge AI:
 - 500+ businesses served, 247% avg traffic growth, 12,000+ reviews generated
 - Month-to-month agreements (no long-term contracts)
 - Free initial SEO audit included
@@ -3593,7 +3593,7 @@ async def initiate_voice_call(request: Request):
     db.commit()
     db.close()
 
-    greeting = f"Hi{' ' + caller_name.split()[0] if caller_name else ''}! This is Sarah from the Growth Labs team. "
+    greeting = f"Hi{' ' + caller_name.split()[0] if caller_name else ''}! This is Sarah from the RankForge AI team. "
     if service_interest:
         greeting += f"I understand you're looking into our {service_interest.replace('-', ' ').title()} solutions. "
     greeting += "Thanks for reaching out — how can I help your business today?"
@@ -3728,7 +3728,7 @@ Transcript:
         "summary": summary,
         "sentiment": sentiment,
         "duration_seconds": duration,
-        "message": "Thank you for calling AI Growth Labs! We'll follow up with you shortly."
+        "message": "Thank you for calling RankForge AI! We'll follow up with you shortly."
     }
 
 
@@ -3765,7 +3765,7 @@ async def get_voice_call(call_id: int, request: Request):
 # Part 9: Live Chat API (Custom Chatbot)
 # ==========================================
 
-CHATBOT_PERSONA = """You are a senior SEO consultant and digital growth strategist at AI Growth Labs.
+CHATBOT_PERSONA = """You are a senior SEO consultant and digital growth strategist at RankForge AI.
 You are a real human expert — never reveal you are AI or automated.
 Your name is Alex and you work in the client success team.
 
@@ -3818,7 +3818,7 @@ async def start_chat_session(request: Request):
     db.commit()
     db.close()
 
-    greeting = f"Hi{' ' + visitor_name.split()[0] if visitor_name else ''}! I'm Alex from the Growth Labs team. How can I help your business grow today?"
+    greeting = f"Hi{' ' + visitor_name.split()[0] if visitor_name else ''}! I'm Alex from the RankForge AI team. How can I help your business grow today?"
 
     return {
         "session_id": session_id,

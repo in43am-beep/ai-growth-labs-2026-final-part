@@ -1,10 +1,10 @@
-# AI Growth Labs — Master Project Plan
+# RankForge AI — Master Project Plan
 ## Step-by-Step Build Roadmap
 
 **Repo:** `github.com/mariadomiguz-a11y/ai-growth-labs-final-3-update`  
 **Branch:** `devin/1778433837-ai-seo-agency-website`  
 **Last Updated:** May 2026  
-**Live Frontend:** https://ai-growth-labs-part2-final-rdmstqlw.devinapps.com  
+**Live Frontend:** https://YOUR_DOMAIN_HERE  
 
 ---
 

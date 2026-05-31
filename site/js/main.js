@@ -1,4 +1,4 @@
-/* ===== AI Growth Labs — Main JavaScript ===== */
+/* ===== RankForge AI — Main JavaScript ===== */
 
 // Mobile nav toggle
 document.getElementById('navToggle')?.addEventListener('click',()=>{
@@ -44,7 +44,7 @@ document.querySelectorAll('.faq-q').forEach(q=>{
 const ChatBot={
   state:{step:0,data:{},typing:false},
   flow:[
-    {msg:"Hi there! 👋 I'm the AI Growth Labs assistant. I help USA local businesses grow their online presence.\n\nHow can I help you today?",
+    {msg:"Hi there! 👋 I'm the RankForge AI assistant. I help USA local businesses grow their online presence.\n\nHow can I help you today?",
      options:["I need help with SEO","I want more Google reviews","I need leads & customers","I want a free website audit"]},
     {msg:"Great choice! To better help you, could you tell me your business name?",input:true,field:"businessName"},
     {msg:"Thanks! What industry is your business in?",

@@ -1,5 +1,5 @@
 /**
- * Live Chat Widget — AI Growth Labs
+ * Live Chat Widget — RankForge AI
  * Custom chatbot with SEO expertise
  */
 (function() {

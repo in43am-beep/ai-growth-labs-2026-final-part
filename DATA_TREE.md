@@ -1,4 +1,4 @@
-# AI Growth Labs — Complete Data Tree
+# RankForge AI — Complete Data Tree
 
 ## Project Structure
 

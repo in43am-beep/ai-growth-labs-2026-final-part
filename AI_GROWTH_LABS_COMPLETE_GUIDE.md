@@ -1,4 +1,4 @@
-# AI Growth Labs — Complete System Guide & Operations Manual
+# RankForge AI — Complete System Guide & Operations Manual
 
 > **Version:** 2.0 | **Date:** May 2026 | **Status:** Production Ready
 > **Frontend:** 56 pages | **Backend:** 99+ API endpoints | **Database:** 28 tables
@@ -385,12 +385,12 @@ Admin assigns project → Worker sees in dashboard → Worker updates tasks
 |------|-------------------|-------------|
 | GA4 ID | `G-XXXXXXXXXX` | Your Google Analytics Measurement ID |
 | Tawk.to | `YOUR_PROPERTY_ID/YOUR_WIDGET_ID` | Your Tawk.to IDs from [dashboard.tawk.to](https://dashboard.tawk.to) |
-| Calendly | `calendly.com/aigrowthlabs/strategy-call` | Your real Calendly booking link |
-| Social Links | facebook.com/aigrowthlabs etc. | Your real social media profile URLs |
+| Calendly | `calendly.com/rankforgeai/strategy-call` | Your real Calendly booking link |
+| Social Links | facebook.com/rankforgeai etc. | Your real social media profile URLs |
 | Team Photos | Placeholder initials on About page | Real team member photos |
 | Phone | +1 (800) 971-0199 | Your real business phone number |
-| Email | hello@aigrowthlabs.com | Your real business email |
-| Logo | "AIGrowthLabs" text | Your actual logo/branding |
+| Email | hello@YOUR_DOMAIN_HERE | Your real business email |
+| Logo | "RankForgeAI" text | Your actual logo/branding |
 | OG Image | Generic branded image | Custom branded OG image (1200x630px) |
 | Canonical URLs | devinapps.com domain | Your production domain |
 | FormSubmit | FormSubmit.co endpoint | Your email for form submissions |
@@ -407,7 +407,7 @@ Admin assigns project → Worker sees in dashboard → Worker updates tasks
 5. Google Search Console — real ranking data
 
 ### Domain & Hosting
-1. Buy domain (e.g., aigrowthlabs.com)
+1. Buy domain (e.g., YOUR_DOMAIN_HERE)
 2. Host frontend on Vercel/Netlify (free)
 3. Host backend on Render/Railway/Fly.io ($5-7/mo)
 4. Point domain DNS to hosting
