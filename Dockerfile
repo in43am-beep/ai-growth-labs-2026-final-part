@@ -30,9 +30,9 @@ ENV PYTHONUNBUFFERED=1
 # nginx serves public traffic on 8080; FastAPI runs internally on 8000
 EXPOSE 8080 8000
 
-# Health check hits the proxied FastAPI /health endpoint
+# Health check hits FastAPI directly (port-stable across platforms)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD curl -fsS http://localhost:8080/health || exit 1
+  CMD curl -fsS http://127.0.0.1:8000/health || exit 1
 
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh

@@ -15,5 +15,9 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-# Start nginx in the foreground (serves public traffic on 8080)
+# Bind nginx to the platform-provided port (Render sets $PORT; default 8080)
+LISTEN_PORT="${PORT:-8080}"
+sed -i "s/listen 8080;/listen ${LISTEN_PORT};/" /etc/nginx/nginx.conf
+
+# Start nginx in the foreground (serves public traffic on $LISTEN_PORT)
 exec nginx -g 'daemon off;'
