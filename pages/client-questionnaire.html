@@ -325,6 +325,24 @@
   (function() {
     const API = window.location.origin;
     let clientInfo = {};
+    const authToken = localStorage.getItem('rf_token');
+
+    // If the client is logged in, skip the manual login step and prefill from their account
+    if (authToken) {
+      fetch(API + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + authToken } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (res) {
+          if (!res || !res.user) return;
+          var u = res.user;
+          clientInfo = { name: u.full_name || '', email: u.email || '', phone: u.phone || '', business: u.business_name || '' };
+          var login = document.getElementById('qLogin');
+          if (login) login.style.display = 'none';
+          document.getElementById('qForm').style.display = 'block';
+          var hs = document.getElementById('qHeaderStatus');
+          if (hs) hs.textContent = 'Welcome, ' + (clientInfo.name.split(' ')[0] || 'there');
+          loadQuestions();
+        }).catch(function () {});
+    }
 
     // Login
     document.getElementById('loginBtn').addEventListener('click', function() {
@@ -494,9 +512,11 @@
       btn.textContent = 'Submitting...';
 
       try {
+        const _headers = { 'Content-Type': 'application/json' };
+        if (authToken) _headers['Authorization'] = 'Bearer ' + authToken;
         const resp = await fetch(API + '/api/seo-questionnaire/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: _headers,
           body: JSON.stringify({
             client_name: clientInfo.name,
             client_email: clientInfo.email,

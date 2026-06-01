@@ -518,9 +518,28 @@ def init_db():
     
     _insert_demo_data(c)
     _insert_package_tasks(c)
+    _migrate_app_users(c)
     
     conn.commit()
     conn.close()
+
+def _migrate_app_users(c):
+    """Add package/payment/questionnaire columns to app_users if missing (idempotent)."""
+    try:
+        cols = {r[1] for r in c.execute("PRAGMA table_info(app_users)").fetchall()}
+        adds = {
+            "package": "TEXT",
+            "payment_status": "TEXT DEFAULT 'unpaid'",
+            "paid_at": "TEXT",
+            "package_started_at": "TEXT",
+            "questionnaire_completed": "INTEGER DEFAULT 0",
+            "questionnaire_id": "INTEGER",
+        }
+        for name, decl in adds.items():
+            if name not in cols:
+                c.execute(f"ALTER TABLE app_users ADD COLUMN {name} {decl}")
+    except Exception as e:
+        print(f"[migrate app_users] {e}")
 
 def _insert_package_tasks(c):
     """Insert DNA-level package task templates"""

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Dashboard | RankForge AI</title>
-  <meta name="description" content="Your RankForge AI account dashboard — view your audit requests and manage your profile.">
+  <meta name="description" content="Your RankForge AI client dashboard — complete your questionnaire, choose a package, and track your SEO tasks.">
   <link rel="canonical" href="https://YOUR_DOMAIN_HERE/pages/dashboard-user.html">
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -26,54 +26,210 @@
   <main class="user-dash container">
     <section class="dash-welcome">
       <h1>Welcome, <span id="user-name">there</span> 👋</h1>
-      <p class="auth-sub">Here's an overview of your RankForge AI account.</p>
+      <p class="auth-sub" id="account-status-line">Loading your account…</p>
     </section>
 
-    <div class="dash-grid">
-      <section class="dash-panel">
-        <h2>My Audit Requests</h2>
-        <div id="audit-list" class="audit-list">
-          <p class="muted">Loading…</p>
-        </div>
-        <a href="free-audit.html" class="btn btn-primary" style="margin-top:16px">Request a New Audit →</a>
-      </section>
+    <!-- STEP 1: Questionnaire (first action) -->
+    <section id="step1-banner" class="step1-banner" style="display:none">
+      <div class="step1-text">
+        <span class="step1-tag">⚠️ Step 1 — Required before work begins</span>
+        <h2>Complete your SEO Strategy Questionnaire</h2>
+        <p>This is your first action. Answer 25 quick questions so our team can build a custom SEO strategy for your business.</p>
+      </div>
+      <a href="client-questionnaire.html" class="btn btn-primary step1-cta">Fill Questionnaire Now →</a>
+    </section>
+    <section id="step1-done" class="step1-banner step1-done" style="display:none">
+      <div class="step1-text">
+        <span class="step1-tag done">✓ Step 1 Complete</span>
+        <h2>SEO Strategy Questionnaire submitted</h2>
+        <p>Thanks! Our strategists are reviewing your answers. You can update them anytime.</p>
+      </div>
+      <a href="client-questionnaire.html" class="btn btn-outline step1-cta">Review / Update →</a>
+    </section>
 
-      <section class="dash-panel">
-        <h2>Account Details</h2>
-        <form id="profile-form">
-          <div class="form-row">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name">
-          </div>
-          <div class="form-row">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" disabled>
-          </div>
-          <div class="form-row">
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone" name="phone">
-          </div>
-          <div class="form-row">
-            <label for="business_name">Business Name</label>
-            <input type="text" id="business_name" name="business_name">
-          </div>
-          <div class="form-row">
-            <label for="website_url">Website URL</label>
-            <input type="url" id="website_url" name="website_url">
-          </div>
-          <div class="form-row">
-            <label for="industry">Industry</label>
-            <input type="text" id="industry" name="industry">
-          </div>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-      </section>
-    </div>
+    <!-- PAYMENT STATUS / PACKAGES -->
+    <section id="packages-section" class="dash-section" style="display:none">
+      <div class="dash-section-head">
+        <h2>Choose Your Growth Package</h2>
+        <p class="muted">Your SEO tasks below are <strong>locked</strong> until you activate a package. Free actions are available right now.</p>
+      </div>
+      <div id="packages-grid" class="dash-packages"></div>
+    </section>
+
+    <section id="active-package-card" class="active-package-card" style="display:none">
+      <div>
+        <span class="badge-paid">✓ Active Package</span>
+        <h2 id="active-package-name">—</h2>
+        <p class="muted" id="active-package-since"></p>
+      </div>
+    </section>
+
+    <!-- FREE ACTIONS (always available pre-purchase) -->
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Free Actions <span class="free-pill">Free</span></h2>
+        <p class="muted">Available to every client — no package required.</p>
+      </div>
+      <div id="free-actions" class="free-actions-grid"></div>
+    </section>
+
+    <!-- SEO TASKS (locked until paid) -->
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Your SEO Tasks</h2>
+        <p class="muted" id="tasks-note"></p>
+      </div>
+      <div id="tasks-list" class="tasks-list"><p class="muted">Loading…</p></div>
+    </section>
+
+    <!-- ACCOUNT DETAILS -->
+    <section class="dash-section">
+      <div class="dash-section-head"><h2>Account Details</h2></div>
+      <form id="profile-form" class="profile-form">
+        <div class="form-row"><label for="full_name">Full Name</label><input type="text" id="full_name" name="full_name"></div>
+        <div class="form-row"><label for="email">Email</label><input type="email" id="email" name="email" disabled></div>
+        <div class="form-row"><label for="phone">Phone</label><input type="tel" id="phone" name="phone"></div>
+        <div class="form-row"><label for="business_name">Business Name</label><input type="text" id="business_name" name="business_name"></div>
+        <div class="form-row"><label for="website_url">Website URL</label><input type="url" id="website_url" name="website_url"></div>
+        <div class="form-row"><label for="industry">Industry</label><input type="text" id="industry" name="industry"></div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </form>
+    </section>
   </main>
 
+  <script src="../js/main.js"></script>
   <script src="../js/auth.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => RankAuth.initDashboard());
+  (function () {
+    var TOKEN_KEY = 'rf_token';
+    function token() { return localStorage.getItem(TOKEN_KEY); }
+    if (!token()) { window.location.href = 'login.html'; return; }
+
+    function api(path, method, body) {
+      return fetch(path, {
+        method: method || 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+        body: body ? JSON.stringify(body) : undefined
+      }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; }); });
+    }
+    function toast(m, t) { if (window.RankToast) RankToast(m, t); else alert(m); }
+
+    var logout = document.getElementById('logout-btn');
+    if (logout) logout.addEventListener('click', function () {
+      api('/api/auth/logout', 'POST').finally(function () {
+        localStorage.removeItem(TOKEN_KEY); window.location.href = 'login.html';
+      });
+    });
+
+    function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+
+    function renderPackages(packages, paid) {
+      var grid = document.getElementById('packages-grid');
+      grid.innerHTML = packages.map(function (p) {
+        var feats = p.features.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('');
+        return '<div class="dash-pkg' + (p.popular ? ' popular' : '') + '">' +
+          (p.popular ? '<span class="pkg-popular">Most Popular</span>' : '') +
+          '<div class="pkg-name">' + esc(p.name) + '</div>' +
+          '<div class="pkg-price">' + esc(p.price_label) + '</div>' +
+          '<div class="pkg-tag">' + esc(p.tagline) + '</div>' +
+          '<ul class="pkg-feats">' + feats + '</ul>' +
+          '<button class="btn btn-primary pkg-buy" data-pkg="' + esc(p.id) + '">Buy &amp; Activate →</button>' +
+          '</div>';
+      }).join('');
+      grid.querySelectorAll('.pkg-buy').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var pkg = btn.dataset.pkg;
+          btn.disabled = true; var lbl = btn.textContent; btn.textContent = 'Processing…';
+          api('/api/user/buy-package', 'POST', { package: pkg }).then(function (res) {
+            if (res.ok) { toast(res.data.message || 'Package activated!', 'success'); load(); }
+            else { toast(res.data.error || 'Could not activate package', 'error'); btn.disabled = false; btn.textContent = lbl; }
+          }).catch(function () { toast('Network error', 'error'); btn.disabled = false; btn.textContent = lbl; });
+        });
+      });
+    }
+
+    function renderFreeActions(actions) {
+      document.getElementById('free-actions').innerHTML = actions.map(function (a) {
+        var href = a.action === 'questionnaire' ? 'client-questionnaire.html' : (a.link || '#');
+        return '<a class="free-action-card" href="' + href + '">' +
+          '<h3>' + esc(a.title) + '</h3><p>' + esc(a.description) + '</p>' +
+          '<span class="free-action-go">Start →</span></a>';
+      }).join('');
+    }
+
+    function renderTasks(tasks, paid, pkgLabel) {
+      var note = document.getElementById('tasks-note');
+      var list = document.getElementById('tasks-list');
+      if (!tasks.length) { list.innerHTML = '<p class="muted">No tasks available.</p>'; return; }
+      note.innerHTML = paid
+        ? 'Active tasks for your <strong>' + esc(pkgLabel || 'package') + '</strong>. Our team is working through these.'
+        : 'Preview of tasks (<strong>locked</strong>). Buy a package above to activate them.';
+      // group by category
+      var groups = {};
+      tasks.forEach(function (t) { (groups[t.category] = groups[t.category] || []).push(t); });
+      var html = '';
+      Object.keys(groups).forEach(function (cat) {
+        html += '<div class="task-group"><h4>' + esc(cat) + '</h4>';
+        groups[cat].forEach(function (t) {
+          html += '<div class="task-item' + (t.locked ? ' locked' : ' active') + '">' +
+            '<span class="task-state">' + (t.locked ? '🔒' : '✓') + '</span>' +
+            '<div class="task-body"><span class="task-title">' + esc(t.title) +
+            (t.automated ? ' <span class="task-auto">AI</span>' : '') + '</span>' +
+            '<span class="task-desc">' + esc(t.description || '') + '</span></div></div>';
+        });
+        html += '</div>';
+      });
+      list.innerHTML = html;
+    }
+
+    function load() {
+      api('/api/user/dashboard').then(function (res) {
+        if (!res.ok) { localStorage.removeItem(TOKEN_KEY); window.location.href = 'login.html'; return; }
+        var d = res.data;
+        var u = d.user;
+        document.getElementById('user-name').textContent = (u.full_name || '').split(' ')[0] || 'there';
+        var paid = d.payment_status === 'paid';
+
+        document.getElementById('account-status-line').innerHTML = paid
+          ? 'Plan: <strong>' + esc(d.package_label || d.package) + '</strong> · Status: <span class="badge-paid-inline">Active</span>'
+          : 'Status: <span class="badge-unpaid-inline">No active package</span> — choose one below to start your SEO work.';
+
+        // Step 1
+        document.getElementById('step1-banner').style.display = d.questionnaire_completed ? 'none' : 'flex';
+        document.getElementById('step1-done').style.display = d.questionnaire_completed ? 'flex' : 'none';
+
+        // Packages vs active package
+        document.getElementById('packages-section').style.display = paid ? 'none' : 'block';
+        document.getElementById('active-package-card').style.display = paid ? 'flex' : 'none';
+        if (paid) {
+          document.getElementById('active-package-name').textContent = d.package_label || d.package;
+          document.getElementById('active-package-since').textContent = d.paid_at ? ('Activated on ' + d.paid_at) : '';
+        } else {
+          renderPackages(d.packages || [], paid);
+        }
+
+        renderFreeActions(d.free_actions || []);
+        renderTasks(d.tasks || [], paid, d.package_label);
+
+        // profile fields
+        ['full_name','email','phone','business_name','website_url','industry'].forEach(function (k) {
+          var el = document.getElementById(k); if (el) el.value = u[k] || '';
+        });
+      }).catch(function () { toast('Could not load dashboard', 'error'); });
+    }
+
+    var pform = document.getElementById('profile-form');
+    if (pform) pform.addEventListener('submit', function (e) {
+      e.preventDefault();
+      api('/api/auth/update', 'PUT', {
+        full_name: pform.full_name.value.trim(), phone: pform.phone.value.trim(),
+        business_name: pform.business_name.value.trim(), website_url: pform.website_url.value.trim(),
+        industry: pform.industry.value.trim()
+      }).then(function (res) { toast(res.data.message || 'Saved', res.ok ? 'success' : 'error'); });
+    });
+
+    load();
+  })();
   </script>
 </body>
 </html>

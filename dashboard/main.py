@@ -704,6 +704,10 @@ def get_app_user(request: Request):
 
 def notify_admins(db, title, message, ntype="lead"):
     """Send an in-app notification to all admin/ops users."""
+    # Map arbitrary categories to the notifications.type CHECK whitelist
+    _allowed = {"info", "warning", "success", "task", "urgent", "chat_request"}
+    if ntype not in _allowed:
+        ntype = {"payment": "success", "signup": "success", "lead": "info"}.get(ntype, "info")
     try:
         admins = db.execute("SELECT id FROM users WHERE role IN ('super_admin','operations_manager','sales')").fetchall()
         for a in admins:
@@ -842,6 +846,178 @@ async def api_reset_password(request: Request):
     db.commit()
     db.close()
     return {"message": "Password has been reset. You can now log in."}
+
+# ============================================================
+# CLIENT PACKAGES + PAYMENT GATING (app users)
+# ============================================================
+PACKAGES = [
+    {
+        "id": "Growth Starter",
+        "name": "Local Growth Starter",
+        "price": 1997,
+        "price_label": "$1,997/mo",
+        "tagline": "For businesses getting started with local SEO",
+        "features": [
+            "Local SEO (30 keywords)",
+            "GBP Optimization (Basic)",
+            "20 Local Citations/month",
+            "4 SEO Blog Posts/month",
+            "Basic Reputation Monitoring",
+            "Monthly Performance Report",
+        ],
+    },
+    {
+        "id": "Growth Pro",
+        "name": "Local Growth Pro",
+        "price": 3997,
+        "price_label": "$3,997/mo",
+        "tagline": "For businesses ready to dominate their market",
+        "popular": True,
+        "features": [
+            "Local SEO (60 keywords)",
+            "GBP Optimization (Full)",
+            "Reputation Management",
+            "40 Local Citations/month",
+            "8 SEO Blog Posts/month",
+            "Review Generation System",
+            "AI SEO Foundation",
+            "Bi-Weekly Strategy Calls",
+        ],
+    },
+    {
+        "id": "Growth Elite",
+        "name": "Local Dominance",
+        "price": 6997,
+        "price_label": "$6,997/mo",
+        "tagline": "For businesses wanting complete market authority",
+        "features": [
+            "Everything in Growth Pro",
+            "100+ Keywords Tracked",
+            "AI SEO Advanced",
+            "Social Media Management",
+            "PPC Campaign Management",
+            "12 Blog Posts/month",
+            "Dedicated Account Manager",
+            "Weekly Strategy Calls",
+        ],
+    },
+]
+
+# Free actions every client can do before purchasing a package
+FREE_ACTIONS = [
+    {"title": "Complete your SEO Strategy Questionnaire", "description": "25 questions so our team can build your custom strategy.", "action": "questionnaire"},
+    {"title": "Request a Free SEO Audit", "description": "Get a no-cost audit of your website and Google Business Profile.", "action": "audit", "link": "free-audit.html"},
+    {"title": "Download Free SEO Resources", "description": "Local SEO checklist, GBP guide, review templates and more.", "action": "resources", "link": "free-resources.html"},
+]
+
+def _package_by_id(pid):
+    for p in PACKAGES:
+        if p["id"] == pid:
+            return p
+    return None
+
+@app.get("/api/packages")
+async def api_list_packages():
+    """Public list of purchasable packages."""
+    return {"packages": PACKAGES}
+
+@app.get("/api/user/dashboard")
+async def api_user_dashboard(request: Request):
+    """Everything the client dashboard needs: profile, payment status, free actions, and package tasks (locked until paid)."""
+    user = get_app_user(request)
+    if not user:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    db = get_db()
+
+    # Resolve questionnaire completion (column flag OR a submission matching the user's email)
+    q_done = bool(user.get("questionnaire_completed"))
+    if not q_done and user.get("email"):
+        qrow = db.execute("SELECT id FROM seo_questionnaires WHERE lower(client_email)=lower(?) ORDER BY id DESC LIMIT 1",
+                          (user["email"],)).fetchone()
+        if qrow:
+            q_done = True
+            db.execute("UPDATE app_users SET questionnaire_completed=1, questionnaire_id=? WHERE id=?",
+                       (qrow["id"], user["id"]))
+            db.commit()
+
+    paid = (user.get("payment_status") == "paid") and bool(user.get("package"))
+    active_package = user.get("package") if paid else None
+
+    # Package tasks for the user's package (when paid) or Growth Starter preview (when unpaid)
+    preview_pkg = active_package or "Growth Starter"
+    rows = db.execute(
+        "SELECT category, title, description, is_automated, order_num FROM package_tasks WHERE package=? ORDER BY order_num, id",
+        (preview_pkg,)
+    ).fetchall()
+    db.close()
+
+    tasks = []
+    for r in rows:
+        tasks.append({
+            "category": r["category"],
+            "title": r["title"],
+            "description": r["description"],
+            "automated": bool(r["is_automated"]),
+            "locked": (not paid),  # locked until payment; active per package after pay
+        })
+
+    return {
+        "user": {
+            "id": user["id"],
+            "full_name": user.get("full_name"),
+            "email": user.get("email"),
+            "phone": user.get("phone"),
+            "business_name": user.get("business_name"),
+            "website_url": user.get("website_url"),
+            "industry": user.get("industry"),
+        },
+        "payment_status": "paid" if paid else "unpaid",
+        "package": active_package,
+        "package_label": (_package_by_id(active_package) or {}).get("name") if active_package else None,
+        "paid_at": user.get("paid_at"),
+        "questionnaire_completed": q_done,
+        "free_actions": FREE_ACTIONS,
+        "packages": PACKAGES,
+        "tasks": tasks,
+        "preview_package": preview_pkg,
+    }
+
+@app.post("/api/user/buy-package")
+async def api_buy_package(request: Request):
+    """Activate a package for the logged-in client (records payment, unlocks tasks, notifies admin)."""
+    user = get_app_user(request)
+    if not user:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    data = await request.json()
+    pkg_id = (data.get("package") or "").strip()
+    pkg = _package_by_id(pkg_id)
+    if not pkg:
+        return JSONResponse({"error": "Invalid package selected"}, status_code=400)
+
+    db = get_db()
+    db.execute("""UPDATE app_users
+                  SET package=?, payment_status='paid', paid_at=datetime('now'), package_started_at=datetime('now')
+                  WHERE id=?""", (pkg_id, user["id"]))
+    # Persist a payment record
+    try:
+        db.execute("""INSERT INTO payments (client_id, amount, status, paid_date, notes, created_at)
+                      VALUES (?,?,?,datetime('now'),?,datetime('now'))""",
+                   (None, pkg["price"], "paid",
+                    f"{pkg['name']} package purchased by app_user #{user['id']} ({user.get('email')})"))
+    except Exception as e:
+        print(f"[buy-package] payment insert skipped: {e}")
+    # Notify admins
+    notify_admins(db, "New Package Purchase",
+                  f"{user.get('full_name')} ({user.get('email')}) purchased {pkg['name']} ({pkg['price_label']}).",
+                  "payment")
+    db.commit()
+    db.close()
+    return {
+        "message": f"{pkg['name']} activated! Your SEO tasks are now unlocked.",
+        "package": pkg_id,
+        "package_label": pkg["name"],
+        "payment_status": "paid",
+    }
 
 # ============================================================
 # PUBLIC LEAD CAPTURE (free-audit + contact forms)
@@ -4342,6 +4518,18 @@ async def submit_seo_questionnaire(request: Request):
         VALUES (?, ?, ?, ?, ?, ?, ?)""",
         (client_name, client_email, client_phone, business_name, json.dumps(answers), comments, source))
     questionnaire_id = c.lastrowid
+
+    # Link to the logged-in app user (mark their Step 1 complete) — by token or by email
+    try:
+        app_user = get_app_user(request)
+        if app_user:
+            c.execute("UPDATE app_users SET questionnaire_completed=1, questionnaire_id=? WHERE id=?",
+                      (questionnaire_id, app_user["id"]))
+        elif client_email:
+            c.execute("UPDATE app_users SET questionnaire_completed=1, questionnaire_id=? WHERE lower(email)=lower(?)",
+                      (questionnaire_id, client_email))
+    except Exception as e:
+        print(f"[questionnaire link] {e}")
 
     # Notify admin and sales team
     admins = db.execute("SELECT id FROM users WHERE role IN ('super_admin','sales','operations_manager','tech_seo')").fetchall()
