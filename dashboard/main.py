@@ -19,15 +19,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from jose import jwt
 from passlib.hash import bcrypt
 
-from database import get_db, init_db
+try:
+    from database import get_db, init_db
+except ModuleNotFoundError:  # when run as `uvicorn dashboard.main:app` from project root
+    from dashboard.database import get_db, init_db
 
 app = FastAPI(title="RankForge AI OS", docs_url=None, redoc_url=None)
 
-# CORS — allow frontend to call API from any origin (for demo/dev)
+# CORS — allowed origins configurable via ALLOWED_ORIGINS (comma-separated); "*" = any
+_allowed_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_allowed_origins,
+    # credentials cannot be combined with wildcard origin per the CORS spec
+    allow_credentials=(_allowed_origins != ["*"]),
     allow_methods=["*"],
     allow_headers=["*"],
 )

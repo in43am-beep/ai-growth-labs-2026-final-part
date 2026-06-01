@@ -9,6 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/config.js"></script>
 </head>
 <body>
   <header class="header">
@@ -106,7 +107,7 @@
     if (!token()) { window.location.href = 'login.html'; return; }
 
     function api(path, method, body) {
-      return fetch(path, {
+      return fetch((window.API_BASE || '') + path, {
         method: method || 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
         body: body ? JSON.stringify(body) : undefined

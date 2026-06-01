@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <script type="application/ld+json" id="article-schema"></script>
+  <script src="../js/config.js"></script>
 </head>
 <body>
   <header class="header">
@@ -66,7 +67,7 @@
       document.getElementById('article-schema').textContent = JSON.stringify(schema);
     }
 
-    fetch('/api/blog/posts/' + encodeURIComponent(slug))
+    fetch((window.API_BASE || '') + '/api/blog/posts/' + encodeURIComponent(slug))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (res) {
         if (res && res.post) { render(res.post); return; }

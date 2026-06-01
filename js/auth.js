@@ -3,7 +3,7 @@
   'use strict';
 
   var TOKEN_KEY = 'rf_token';
-  var API = ''; // same origin
+  var API = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : ''; // backend base URL
 
   function getToken() { return localStorage.getItem(TOKEN_KEY); }
   function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }

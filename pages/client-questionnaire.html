@@ -272,6 +272,7 @@
     }
     .q-login-btn:hover { transform: scale(1.01); }
   </style>
+  <script src="../js/config.js"></script>
 </head>
 <body>
   <div class="q-header">
@@ -323,7 +324,7 @@
 
   <script>
   (function() {
-    const API = window.location.origin;
+    const API = (window.API_BASE || window.location.origin);
     let clientInfo = {};
     const authToken = localStorage.getItem('rf_token');
 
