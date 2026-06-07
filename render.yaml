@@ -1,0 +1,24 @@
+# Render.com Blueprint — RankForge AI (FastAPI + nginx via Docker)
+# Deploy: Render Dashboard → New → Blueprint → select this repo → Apply.
+# Free tier. nginx serves the static site and reverse-proxies /api, /dashboard,
+# etc. to the FastAPI app (uvicorn) running internally on port 8000.
+services:
+  - type: web
+    name: rankforge-ai
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: FRONTEND_DIR
+        value: /app
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # JWT signing secret — Render generates a strong value automatically
+      - key: SECRET_KEY
+        generateValue: true
+      # Set your Gemini API key in the Render dashboard (kept out of git)
+      - key: GEMINI_API_KEY
+        sync: false

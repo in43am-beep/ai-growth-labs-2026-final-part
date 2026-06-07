@@ -534,6 +534,16 @@ def _migrate_app_users(c):
             "package_started_at": "TEXT",
             "questionnaire_completed": "INTEGER DEFAULT 0",
             "questionnaire_id": "INTEGER",
+            # reminder scheduler
+            "reminder_count": "INTEGER DEFAULT 0",
+            "last_reminder_at": "TEXT",
+            # auth provider / oauth
+            "auth_provider": "TEXT DEFAULT 'local'",
+            "google_id": "TEXT",
+            # real payments (Stripe)
+            "payment_provider": "TEXT",
+            "stripe_customer_id": "TEXT",
+            "stripe_subscription_id": "TEXT",
         }
         for name, decl in adds.items():
             if name not in cols:

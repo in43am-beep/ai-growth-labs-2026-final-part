@@ -19,15 +19,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from jose import jwt
 from passlib.hash import bcrypt
 
-from database import get_db, init_db
+try:
+    from database import get_db, init_db
+    import integrations
+except ModuleNotFoundError:  # when run as `uvicorn dashboard.main:app` from project root
+    from dashboard.database import get_db, init_db
+    from dashboard import integrations
 
 app = FastAPI(title="RankForge AI OS", docs_url=None, redoc_url=None)
 
-# CORS — allow frontend to call API from any origin (for demo/dev)
+# CORS — allowed origins configurable via ALLOWED_ORIGINS (comma-separated); "*" = any
+_allowed_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_allowed_origins,
+    # credentials cannot be combined with wildcard origin per the CORS spec
+    allow_credentials=(_allowed_origins != ["*"]),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -65,6 +72,11 @@ templates = Jinja2Templates(directory=templates_dir)
 @app.on_event("startup")
 def startup():
     init_db()
+    # Start background scheduler (questionnaire reminders every 2 days, etc.)
+    try:
+        integrations.start_scheduler()
+    except Exception as e:
+        print(f"[startup] scheduler start failed: {e}")
 
 # ===== AUTH =====
 def create_token(user_id: int, role: str, username: str):
@@ -142,6 +154,19 @@ def rate_limit(key_prefix: str, max_requests: int = 10, window_seconds: int = 60
             return await func(request, *args, **kwargs)
         return wrapper
     return decorator
+
+def check_rate_limit(request: Request, prefix: str, max_requests: int, window_seconds: int) -> bool:
+    """Lightweight inline rate limiter (per client IP). Returns True if allowed."""
+    client_ip = request.client.host if request.client else "unknown"
+    key = f"{prefix}:{client_ip}"
+    now = time.time()
+    recent = [t for t in _rate_limit_store.get(key, []) if now - t < window_seconds]
+    if len(recent) >= max_requests:
+        _rate_limit_store[key] = recent
+        return False
+    recent.append(now)
+    _rate_limit_store[key] = recent
+    return True
 
 def log_activity(db, user_id, action, details=None, entity_type=None, entity_id=None):
     db.execute("INSERT INTO activity_log (user_id, action, details, entity_type, entity_id) VALUES (?,?,?,?,?)",
@@ -718,6 +743,9 @@ def notify_admins(db, title, message, ntype="lead"):
 
 @app.post("/api/auth/signup")
 async def api_signup(request: Request):
+    # rate limit: max 5 signups / hour per IP (anti-abuse)
+    if not check_rate_limit(request, "signup", 5, 3600):
+        return JSONResponse({"error": "Too many signups from this network. Please try again later."}, status_code=429)
     data = await request.json()
     full_name = (data.get("full_name") or "").strip()
     email = (data.get("email") or "").strip().lower()
@@ -817,8 +845,22 @@ async def api_forgot_password(request: Request):
         expiry = (datetime.utcnow() + timedelta(hours=1)).isoformat()
         db.execute("UPDATE app_users SET reset_token=?, reset_token_expiry=? WHERE id=?", (token, expiry, row["id"]))
         db.commit()
-        # No email service configured — log reset link to console
-        print(f"[PASSWORD RESET] {email} -> token: {token} (expires {expiry})")
+        reset_link = f"{integrations.frontend_base_url()}/pages/reset-password.html?token={token}"
+        # Send the reset email if SMTP is configured; always log a fallback to console.
+        html = (
+            f"<div style='font-family:Arial,sans-serif;max-width:560px;margin:auto'>"
+            f"<h2 style='color:#1a73e8'>Reset your password</h2>"
+            f"<p>We received a request to reset your RankForge AI password. "
+            f"This link expires in 1 hour.</p>"
+            f"<p style='margin:28px 0'><a href='{reset_link}' "
+            f"style='background:#1a73e8;color:#fff;padding:12px 22px;border-radius:6px;"
+            f"text-decoration:none'>Reset password →</a></p>"
+            f"<p style='color:#666;font-size:13px'>If you didn't request this, you can ignore this email.</p>"
+            f"<p style='color:#666;font-size:13px'>— The RankForge AI Team</p></div>"
+        )
+        ok, _ = integrations.send_email(email, "Reset your RankForge AI password", html_body=html, db=db)
+        if not ok:
+            print(f"[PASSWORD RESET] {email} -> {reset_link} (expires {expiry})")
     db.close()
     # Always return success to avoid email enumeration
     return {"message": "If an account exists for this email, a reset link has been sent."}
@@ -846,6 +888,64 @@ async def api_reset_password(request: Request):
     db.commit()
     db.close()
     return {"message": "Password has been reset. You can now log in."}
+
+# ============================================================
+# GOOGLE OAUTH (env-gated: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)
+# ============================================================
+_oauth_states = {}  # state -> created_at (simple CSRF guard)
+
+@app.get("/api/auth/google/login")
+async def api_google_login():
+    if not integrations.google_enabled():
+        return JSONResponse(
+            {"error": "Google sign-in is not configured.", "configured": False},
+            status_code=503)
+    state = secrets.token_urlsafe(24)
+    _oauth_states[state] = time.time()
+    # prune old states (>10 min)
+    for s, t in list(_oauth_states.items()):
+        if time.time() - t > 600:
+            _oauth_states.pop(s, None)
+    return RedirectResponse(url=integrations.google_auth_url(state), status_code=302)
+
+@app.get("/api/auth/google/callback")
+async def api_google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+    frontend = integrations.frontend_base_url()
+    if error or not code:
+        return RedirectResponse(url=f"{frontend}/pages/login.html?oauth=error", status_code=302)
+    if state not in _oauth_states:
+        return RedirectResponse(url=f"{frontend}/pages/login.html?oauth=badstate", status_code=302)
+    _oauth_states.pop(state, None)
+    try:
+        info = integrations.google_exchange_code(code)
+    except Exception as e:
+        print(f"[google oauth] {e}")
+        return RedirectResponse(url=f"{frontend}/pages/login.html?oauth=error", status_code=302)
+    email = (info.get("email") or "").strip().lower()
+    if not email:
+        return RedirectResponse(url=f"{frontend}/pages/login.html?oauth=noemail", status_code=302)
+    full_name = info.get("name") or email.split("@")[0]
+    google_id = info.get("id")
+    db = get_db()
+    row = db.execute("SELECT * FROM app_users WHERE email=?", (email,)).fetchone()
+    if row:
+        uid = row["id"]
+        db.execute("UPDATE app_users SET last_login=datetime('now'), auth_provider='google', google_id=COALESCE(google_id, ?) WHERE id=?",
+                   (google_id, uid))
+    else:
+        # OAuth users get a random password hash (they sign in via Google)
+        pwd_hash = bcrypt.hash(secrets.token_urlsafe(32))
+        c = db.cursor()
+        c.execute("""INSERT INTO app_users (full_name, email, phone, password_hash, business_name, auth_provider, google_id, is_verified)
+                     VALUES (?,?,?,?,?, 'google', ?, 1)""",
+                  (full_name, email, "", pwd_hash, "", google_id))
+        uid = c.lastrowid
+        notify_admins(db, "New Account Signup", f"{full_name} ({email}) signed up with Google", "signup")
+    db.commit()
+    db.close()
+    token = create_app_token(uid, email)
+    # Hand the token to the static frontend via URL fragment (kept out of server logs).
+    return RedirectResponse(url=f"{frontend}/pages/login.html#token={token}", status_code=302)
 
 # ============================================================
 # CLIENT PACKAGES + PAYMENT GATING (app users)
@@ -995,21 +1095,7 @@ async def api_buy_package(request: Request):
         return JSONResponse({"error": "Invalid package selected"}, status_code=400)
 
     db = get_db()
-    db.execute("""UPDATE app_users
-                  SET package=?, payment_status='paid', paid_at=datetime('now'), package_started_at=datetime('now')
-                  WHERE id=?""", (pkg_id, user["id"]))
-    # Persist a payment record
-    try:
-        db.execute("""INSERT INTO payments (client_id, amount, status, paid_date, notes, created_at)
-                      VALUES (?,?,?,datetime('now'),?,datetime('now'))""",
-                   (None, pkg["price"], "paid",
-                    f"{pkg['name']} package purchased by app_user #{user['id']} ({user.get('email')})"))
-    except Exception as e:
-        print(f"[buy-package] payment insert skipped: {e}")
-    # Notify admins
-    notify_admins(db, "New Package Purchase",
-                  f"{user.get('full_name')} ({user.get('email')}) purchased {pkg['name']} ({pkg['price_label']}).",
-                  "payment")
+    _activate_package(db, user["id"], pkg, provider="simulated", notes_extra="(simulated — no card charged)")
     db.commit()
     db.close()
     return {
@@ -1017,7 +1103,118 @@ async def api_buy_package(request: Request):
         "package": pkg_id,
         "package_label": pkg["name"],
         "payment_status": "paid",
+        "mode": "simulated",
     }
+
+def _activate_package(db, app_user_id, pkg, provider="simulated", notes_extra="",
+                      stripe_customer_id=None, stripe_subscription_id=None):
+    """Shared activation logic used by both simulated buy-package and Stripe webhook/verify."""
+    urow = db.execute("SELECT full_name, email FROM app_users WHERE id=?", (app_user_id,)).fetchone()
+    full_name = urow["full_name"] if urow else ""
+    email = urow["email"] if urow else ""
+    db.execute("""UPDATE app_users
+                  SET package=?, payment_status='paid', paid_at=datetime('now'),
+                      package_started_at=datetime('now'), payment_provider=?,
+                      stripe_customer_id=COALESCE(?, stripe_customer_id),
+                      stripe_subscription_id=COALESCE(?, stripe_subscription_id)
+                  WHERE id=?""",
+               (pkg["id"], provider, stripe_customer_id, stripe_subscription_id, app_user_id))
+    try:
+        db.execute("""INSERT INTO payments (client_id, amount, status, paid_date, notes, created_at)
+                      VALUES (?,?,?,datetime('now'),?,datetime('now'))""",
+                   (None, pkg["price"], "paid",
+                    f"{pkg['name']} package purchased by app_user #{app_user_id} ({email}) via {provider} {notes_extra}".strip()))
+    except Exception as e:
+        print(f"[activate-package] payment insert skipped: {e}")
+    notify_admins(db, "New Package Purchase",
+                  f"{full_name} ({email}) purchased {pkg['name']} ({pkg['price_label']}) via {provider}.",
+                  "payment")
+
+@app.post("/api/user/create-checkout-session")
+async def api_create_checkout_session(request: Request):
+    """Start a real Stripe Checkout for the selected package.
+
+    Falls back (simulated=True) when Stripe is not configured, so the frontend
+    can use the existing buy-package flow."""
+    user = get_app_user(request)
+    if not user:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    data = await request.json()
+    pkg = _package_by_id((data.get("package") or "").strip())
+    if not pkg:
+        return JSONResponse({"error": "Invalid package selected"}, status_code=400)
+    if not integrations.stripe_enabled():
+        # No Stripe key — tell the frontend to use the simulated buy-package endpoint.
+        return {"simulated": True, "message": "Stripe not configured; using simulated activation."}
+    frontend = integrations.frontend_base_url()
+    success_url = f"{frontend}/pages/dashboard-user.html?checkout=success&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{frontend}/pages/dashboard-user.html?checkout=cancel"
+    try:
+        url, session_id = integrations.create_checkout_session(pkg, user, success_url, cancel_url)
+        return {"simulated": False, "checkout_url": url, "session_id": session_id}
+    except Exception as e:
+        print(f"[stripe checkout] {e}")
+        return JSONResponse({"error": f"Could not start checkout: {e}"}, status_code=502)
+
+@app.get("/api/user/verify-checkout")
+async def api_verify_checkout(request: Request, session_id: str):
+    """Verify a completed Stripe Checkout on the success redirect and activate the package."""
+    user = get_app_user(request)
+    if not user:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    if not integrations.stripe_enabled():
+        return JSONResponse({"error": "Stripe not configured"}, status_code=400)
+    try:
+        session = integrations.retrieve_checkout_session(session_id)
+    except Exception as e:
+        return JSONResponse({"error": f"Invalid session: {e}"}, status_code=400)
+    paid = getattr(session, "payment_status", None) == "paid" or getattr(session, "status", None) == "complete"
+    meta = dict(getattr(session, "metadata", {}) or {})
+    if str(meta.get("app_user_id")) != str(user["id"]):
+        return JSONResponse({"error": "Session does not belong to this account"}, status_code=403)
+    pkg = _package_by_id(meta.get("package_id", ""))
+    if not paid or not pkg:
+        return {"paid": False}
+    db = get_db()
+    _activate_package(db, user["id"], pkg, provider="stripe",
+                      stripe_customer_id=getattr(session, "customer", None),
+                      stripe_subscription_id=getattr(session, "subscription", None))
+    db.commit()
+    db.close()
+    return {"paid": True, "package": pkg["id"], "package_label": pkg["name"]}
+
+@app.post("/api/stripe/webhook")
+async def api_stripe_webhook(request: Request):
+    """Stripe webhook — activates the package on checkout.session.completed."""
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature")
+    try:
+        event = integrations.verify_webhook(payload, sig)
+    except Exception as e:
+        return JSONResponse({"error": f"Webhook verification failed: {e}"}, status_code=400)
+    etype = event["type"] if isinstance(event, dict) else event.get("type")
+    if etype == "checkout.session.completed":
+        obj = (event["data"]["object"] if isinstance(event, dict) else event.data.object)
+        meta = dict(obj.get("metadata") or {}) if isinstance(obj, dict) else dict(getattr(obj, "metadata", {}) or {})
+        app_user_id = meta.get("app_user_id")
+        pkg = _package_by_id(meta.get("package_id", ""))
+        if app_user_id and pkg:
+            db = get_db()
+            _activate_package(db, int(app_user_id), pkg, provider="stripe",
+                              stripe_customer_id=(obj.get("customer") if isinstance(obj, dict) else getattr(obj, "customer", None)),
+                              stripe_subscription_id=(obj.get("subscription") if isinstance(obj, dict) else getattr(obj, "subscription", None)))
+            db.commit()
+            db.close()
+    return {"received": True}
+
+@app.get("/api/integrations/status")
+async def api_integrations_status():
+    """Public snapshot of which integrations are live (no secrets exposed)."""
+    db = get_db()
+    try:
+        return integrations.integration_status(db)
+    finally:
+        db.close()
 
 # ============================================================
 # PUBLIC LEAD CAPTURE (free-audit + contact forms)
@@ -2756,27 +2953,28 @@ async def voice_recording(request: Request):
 
 @app.post("/api/voice/outbound")
 async def voice_outbound(request: Request):
-    """Initiate outbound call (demo mode)"""
+    """Initiate a real outbound call via Twilio (env or Settings credentials)."""
     user = require_role(request, ["super_admin", "sales", "account_manager"])
     data = await request.json()
-    phone = data.get("phone_number", "")
-    
+    phone = (data.get("phone_number") or "").strip()
+    if not phone:
+        return JSONResponse({"error": "phone_number is required"}, status_code=400)
+
     db = get_db()
-    api = db.execute("SELECT * FROM api_settings WHERE provider='twilio' AND is_active=1").fetchone()
-    
-    if api and api["api_key"]:
-        # PRODUCTION: Real Twilio call
-        # from twilio.rest import Client
-        # config = json.loads(api["config_json"])
-        # client = Client(config["account_sid"], api["api_key"])
-        # call = client.calls.create(to=phone, from_=config["phone_number"], url=config["voice_url"])
-        log_activity(db, user["id"], "outbound_call", f"Outbound call to {phone}", "system", 0)
+    if not integrations.twilio_enabled(db):
+        db.close()
+        return {"message": "Twilio not configured", "status": "not_configured",
+                "note": "Set TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_PHONE_NUMBER (env) or add Twilio in Settings → API Settings"}
+
+    twiml_url = integrations.public_base_url() + "/api/voice/incoming"
+    ok, detail, call_sid = integrations.place_call(phone, twiml_url, db=db)
+    if ok:
+        log_activity(db, user["id"], "outbound_call", f"Outbound call to {phone} (sid={call_sid})", "system", 0)
         db.commit()
         db.close()
-        return {"message": f"Call initiated to {phone}", "status": "demo", "call_sid": f"demo_call_{int(time.time())}", "note": "Demo mode — connect real Twilio credentials for live calls"}
-    else:
-        db.close()
-        return {"message": "Twilio not configured", "status": "not_configured", "note": "Add Twilio Account SID and Auth Token in Settings → API Settings"}
+        return {"message": f"Call initiated to {phone}", "status": "initiated", "call_sid": call_sid}
+    db.close()
+    return JSONResponse({"message": "Call failed", "status": "error", "detail": detail}, status_code=502)
 
 # ----- 6. WHATSAPP INTEGRATION (Demo) -----
 @app.post("/api/whatsapp/send")
@@ -4101,6 +4299,8 @@ Ask these naturally in conversation — don't read them like a checklist. If the
 @app.post("/api/voice/call/initiate")
 async def initiate_voice_call(request: Request):
     """Initiate an AI voice call session — returns a call_id and initial greeting."""
+    if not check_rate_limit(request, "voice_initiate", 10, 600):
+        return JSONResponse({"error": "Too many call attempts. Please try again shortly."}, status_code=429)
     data = await request.json()
     caller_name = data.get("name", "").strip()
     caller_email = data.get("email", "").strip()
@@ -4143,6 +4343,8 @@ async def initiate_voice_call(request: Request):
 @app.post("/api/voice/call/{call_id}/message")
 async def voice_call_message(call_id: int, request: Request):
     """Send a message in an active AI voice call and get AI response."""
+    if not check_rate_limit(request, "voice_msg", 40, 60):
+        return JSONResponse({"error": "You're sending messages too quickly. Please slow down."}, status_code=429)
     data = await request.json()
     user_message = data.get("message", "").strip()
     history = data.get("history", [])
@@ -4337,6 +4539,8 @@ Key facts:
 @app.post("/api/chat/start")
 async def start_chat_session(request: Request):
     """Start a new live chat session."""
+    if not check_rate_limit(request, "chat_start", 15, 600):
+        return JSONResponse({"error": "Too many chat sessions. Please try again shortly."}, status_code=429)
     data = await request.json()
     visitor_name = data.get("name", "").strip()
     visitor_email = data.get("email", "").strip()
@@ -4363,6 +4567,8 @@ async def start_chat_session(request: Request):
 @app.post("/api/chat/message")
 async def chat_message(request: Request):
     """Send a message in live chat and get response."""
+    if not check_rate_limit(request, "chat_msg", 40, 60):
+        return JSONResponse({"error": "You're sending messages too quickly. Please slow down."}, status_code=429)
     data = await request.json()
     session_id = data.get("session_id", "")
     user_message = data.get("message", "").strip()
@@ -4540,12 +4746,36 @@ async def submit_seo_questionnaire(request: Request):
              f"New SEO Questionnaire: {business_name or client_name}",
              f"Client {client_name} ({client_email}) submitted their SEO strategy questionnaire. {len(answers)} questions answered."))
 
+    # Auto-analyse the answers → build a strategy report → route to the relevant
+    # department dashboards (in-app notifications + stored report).
+    report = None
+    try:
+        report = integrations.analyze_questionnaire(answers, business_name, client_name)
+        integrations.route_questionnaire_report(db, questionnaire_id, report)
+    except Exception as e:
+        print(f"[questionnaire auto-report] {e}")
+
+    # Confirmation email to the client (if SMTP configured)
+    try:
+        if client_email:
+            integrations.send_email(
+                client_email,
+                "We received your SEO questionnaire",
+                html_body=(f"<p>Hi {(client_name or 'there').split(' ')[0]},</p>"
+                           f"<p>Thanks for completing your SEO Strategy Questionnaire. "
+                           f"Our team is reviewing your answers and will be in touch within 24 hours.</p>"
+                           f"<p>— The RankForge AI Team</p>"),
+                db=db)
+    except Exception as e:
+        print(f"[questionnaire confirm email] {e}")
+
     db.commit()
     db.close()
 
     return {
         "questionnaire_id": questionnaire_id,
         "status": "submitted",
+        "report": report,
         "message": "Thank you! Your SEO strategy questionnaire has been submitted. Our team will review it and get back to you within 24 hours."
     }
 

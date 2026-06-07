@@ -116,6 +116,7 @@
   <script type="application/ld+json">
   {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://YOUR_DOMAIN_HERE/"}, {"@type": "ListItem", "position": 2, "name": "Free SEO DNA Audit", "item": "https://YOUR_DOMAIN_HERE/pages/free-audit.html"}]}
   </script>
+  <script src="../js/config.js"></script>
 </head>
 <body>
   <header class="header">
@@ -504,7 +505,7 @@
   <script src="../js/form-validation.js"></script>
   <script>
     // Backend API URL — Fly.io permanent deployment
-    const API_URL = '';
+    const API_URL = (window.API_BASE || '');
 
     async function runAudit(e) {
       e.preventDefault();

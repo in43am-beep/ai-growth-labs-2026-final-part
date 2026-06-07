@@ -9,6 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/config.js"></script>
 </head>
 <body>
   <header class="header">
@@ -106,7 +107,7 @@
     if (!token()) { window.location.href = 'login.html'; return; }
 
     function api(path, method, body) {
-      return fetch(path, {
+      return fetch((window.API_BASE || '') + path, {
         method: method || 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
         body: body ? JSON.stringify(body) : undefined
@@ -140,10 +141,19 @@
         btn.addEventListener('click', function () {
           var pkg = btn.dataset.pkg;
           btn.disabled = true; var lbl = btn.textContent; btn.textContent = 'Processing…';
-          api('/api/user/buy-package', 'POST', { package: pkg }).then(function (res) {
-            if (res.ok) { toast(res.data.message || 'Package activated!', 'success'); load(); }
-            else { toast(res.data.error || 'Could not activate package', 'error'); btn.disabled = false; btn.textContent = lbl; }
-          }).catch(function () { toast('Network error', 'error'); btn.disabled = false; btn.textContent = lbl; });
+          function restore() { btn.disabled = false; btn.textContent = lbl; }
+          function simulate() {
+            // Stripe not configured — fall back to instant activation.
+            api('/api/user/buy-package', 'POST', { package: pkg }).then(function (r) {
+              if (r.ok) { toast(r.data.message || 'Package activated!', 'success'); load(); }
+              else { toast(r.data.error || 'Could not activate package', 'error'); restore(); }
+            }).catch(function () { toast('Network error', 'error'); restore(); });
+          }
+          // Try real Stripe checkout first; redirect to Stripe if available.
+          api('/api/user/create-checkout-session', 'POST', { package: pkg }).then(function (res) {
+            if (res.ok && res.data && res.data.checkout_url) { window.location.href = res.data.checkout_url; return; }
+            simulate();
+          }).catch(function () { simulate(); });
         });
       });
     }
@@ -228,7 +238,26 @@
       }).then(function (res) { toast(res.data.message || 'Saved', res.ok ? 'success' : 'error'); });
     });
 
-    load();
+    // Handle Stripe Checkout return (?checkout=success&session_id=...)
+    function handleCheckoutReturn(done) {
+      var qs = new URLSearchParams(window.location.search);
+      var co = qs.get('checkout');
+      var sid = qs.get('session_id');
+      // clean the URL so a refresh doesn't re-trigger
+      if (co) { history.replaceState({}, document.title, window.location.pathname); }
+      if (co === 'success' && sid) {
+        api('/api/user/verify-checkout?session_id=' + encodeURIComponent(sid)).then(function (res) {
+          if (res.ok && res.data && res.data.paid) { toast('Payment successful — your package is now active!', 'success'); }
+          else { toast('Payment is processing. Your package will activate shortly.', 'info'); }
+          done();
+        }).catch(function () { done(); });
+        return;
+      }
+      if (co === 'cancel') { toast('Checkout canceled.', 'info'); }
+      done();
+    }
+
+    handleCheckoutReturn(load);
   })();
   </script>
 </body>
