@@ -60,9 +60,39 @@
 
   function bindGoogle() {
     var g = document.getElementById('google-btn');
-    if (g) g.addEventListener('click', function () {
-      showAlert('Google sign-in is not configured yet. Please use the email form.', 'error');
+    if (!g) return;
+    g.addEventListener('click', function () {
+      g.disabled = true;
+      // Check whether Google OAuth is configured on the backend before redirecting.
+      api('/api/integrations/status').then(function (res) {
+        if (res.ok && res.data && res.data.google_oauth) {
+          window.location.href = API + '/api/auth/google/login';
+        } else {
+          showAlert('Google sign-in is not configured yet. Please use the email form.', 'error');
+          g.disabled = false;
+        }
+      }).catch(function () {
+        showAlert('Could not reach the server. Please use the email form.', 'error');
+        g.disabled = false;
+      });
     });
+  }
+
+  // Capture a token handed back by the OAuth callback (#token=...) or surface ?oauth=error.
+  function handleOAuthRedirect() {
+    if (window.location.hash && window.location.hash.indexOf('token=') !== -1) {
+      var t = window.location.hash.split('token=')[1];
+      if (t) {
+        setToken(decodeURIComponent(t));
+        window.location.replace('dashboard-user.html');
+        return true;
+      }
+    }
+    var qs = new URLSearchParams(window.location.search);
+    if (qs.get('oauth')) {
+      showAlert('Google sign-in failed (' + qs.get('oauth') + '). Please try again or use the email form.', 'error');
+    }
+    return false;
   }
 
   // ---------- SIGNUP ----------
@@ -129,6 +159,7 @@
 
   // ---------- LOGIN ----------
   function initLogin() {
+    if (handleOAuthRedirect()) return;
     if (getToken()) { window.location.href = 'dashboard-user.html'; return; }
     bindPasswordToggles();
     bindGoogle();
