@@ -42,6 +42,148 @@ def frontend_base_url():
 
 
 # ============================================================
+# BEYOND SEO "BRAIN" (file-based SEO operating system)
+# ============================================================
+# The skill lives under dashboard/skills/beyond-seo/. We load its compact
+# core rules + reporting standards once and inject them into every AI call
+# so the chat/call agent and auto-reports think like a senior SEO strategist
+# (no fluff, evidence-based, labels missing data) instead of generic filler.
+_BRAIN_CACHE = None
+_BRAIN_DIR = os.path.join(os.path.dirname(__file__), "skills", "beyond-seo")
+# Core rule files, in the order they should be presented to the model.
+_BRAIN_CORE_FILES = [
+    "core/seo-principles.md",
+    "core/no-fluff-rules.md",
+    "core/data-quality-rules.md",
+    "core/seo-aeo-definition.md",
+    "core/final-output-standards.md",
+    "core/decision-tree.md",
+]
+
+
+def beyond_seo_available():
+    """True if the Beyond SEO skill files are present in the repo."""
+    return os.path.isdir(_BRAIN_DIR) and os.path.isfile(os.path.join(_BRAIN_DIR, "SKILL.md"))
+
+
+def beyond_seo_brain():
+    """Return the compact Beyond SEO brain as a single system-prompt string.
+
+    Cached after first load. Returns "" if the skill folder is missing so
+    callers degrade gracefully to their existing personas.
+    """
+    global _BRAIN_CACHE
+    if _BRAIN_CACHE is not None:
+        return _BRAIN_CACHE
+    if not beyond_seo_available():
+        _BRAIN_CACHE = ""
+        return _BRAIN_CACHE
+    parts = [
+        "=== BEYOND SEO OPERATING RULES (follow these in every SEO answer) ===",
+        "You operate as a senior SEO/AEO/GEO strategist. No fluff, no fake "
+        "guarantees, no generic checklists. Every recommendation must connect "
+        "to crawlability, intent, authority, local visibility, conversion, or "
+        "AI-search visibility, and must include: issue, evidence, impact, exact "
+        "fix, priority, and how to measure it. Never invent rankings, search "
+        "volume, traffic, or backlinks — if data is missing, say so and label "
+        "estimates (Confirmed / Likely / Directional / Estimated / Not Verified).",
+    ]
+    for rel in _BRAIN_CORE_FILES:
+        fp = os.path.join(_BRAIN_DIR, rel)
+        try:
+            with open(fp, "r", encoding="utf-8") as fh:
+                parts.append(fh.read().strip())
+        except Exception:
+            continue
+    _BRAIN_CACHE = "\n\n".join(parts).strip()
+    return _BRAIN_CACHE
+
+
+def ai_system_prompt(base_persona=""):
+    """Combine a caller's persona with the Beyond SEO brain (if available)."""
+    brain = beyond_seo_brain()
+    if not brain:
+        return base_persona
+    if not base_persona:
+        return brain
+    return base_persona.rstrip() + "\n\n" + brain
+
+
+# ============================================================
+# APIFY DATA LAYER (real crawl / SERP / authority data)
+# ============================================================
+# Env-gated. When APIFY_API_TOKEN is absent the helpers return None and the
+# brain falls back to "Advisory mode" (reasoning without live data) so the
+# site never breaks.
+def apify_enabled():
+    return bool(_env("APIFY_API_TOKEN"))
+
+
+def apify_run_actor(actor_id, run_input, timeout=120):
+    """Run an Apify actor synchronously and return its dataset items (list).
+
+    Returns None on any failure (missing token, network error, bad actor) so
+    callers can degrade to advisory mode. The token is read from the env and
+    never logged.
+    """
+    token = _env("APIFY_API_TOKEN")
+    if not token:
+        return None
+    try:
+        import requests
+        # run-sync-get-dataset-items returns the produced items directly.
+        url = (
+            f"https://api.apify.com/v2/acts/{actor_id}/run-sync-get-dataset-items"
+            f"?token={token}&timeout={timeout}"
+        )
+        resp = requests.post(url, json=run_input, timeout=timeout + 15)
+        if resp.status_code >= 400:
+            print(f"[apify] actor {actor_id} -> HTTP {resp.status_code}")
+            return None
+        return resp.json()
+    except Exception as e:
+        print(f"[apify] actor {actor_id} failed: {e}")
+        return None
+
+
+def apify_site_overview(url, max_pages=5):
+    """Credit-safe crawl of a site using Apify's website-content-crawler.
+
+    Returns a compact dict {url, pages_crawled, titles, sample} or None when
+    Apify is not configured / the crawl fails. Kept small to stay within AI
+    token limits and Apify credits.
+    """
+    if not apify_enabled() or not url:
+        return None
+    items = apify_run_actor(
+        "apify~website-content-crawler",
+        {
+            "startUrls": [{"url": url}],
+            "maxCrawlPages": max_pages,
+            "crawlerType": "cheerio",
+        },
+        timeout=120,
+    )
+    if not items:
+        return None
+    titles, sample = [], ""
+    for it in items[:max_pages]:
+        t = (it.get("metadata", {}) or {}).get("title") or it.get("title") or ""
+        if t:
+            titles.append(t)
+        if not sample:
+            sample = (it.get("text") or "")[:600]
+    return {
+        "url": url,
+        "pages_crawled": len(items),
+        "titles": titles[:max_pages],
+        "sample": sample,
+        "source": "apify:website-content-crawler",
+        "quality": "Directional",
+    }
+
+
+# ============================================================
 # EMAIL (SMTP)
 # ============================================================
 def email_config(db=None):
@@ -277,10 +419,13 @@ _ANALYSIS_RULES = [
 ]
 
 
-def analyze_questionnaire(answers, business_name="", client_name=""):
+def analyze_questionnaire(answers, business_name="", client_name="", website=""):
     """Turn raw questionnaire answers into a structured strategy report.
 
-    Returns a dict with focus_areas, departments (role names), summary.
+    Uses the Beyond SEO brain to produce evidence-based, no-fluff focus areas
+    and, when APIFY_API_TOKEN is set and a website is provided, enriches the
+    report with a credit-safe live crawl. Returns a dict with focus_areas,
+    departments (role names), summary, plus mode/site_data/recommendations.
     """
     try:
         text = json.dumps(answers, default=str).lower()
@@ -298,13 +443,53 @@ def analyze_questionnaire(answers, business_name="", client_name=""):
         depts = ["tech_seo"]
     n = len(answers) if isinstance(answers, dict) else 0
     name = business_name or client_name or "New client"
+
+    # Data layer: try a live crawl only if Apify is configured + URL given.
+    site_data = apify_site_overview(website) if (website and apify_enabled()) else None
+    mode = "Apify Intelligence" if site_data else ("Advisory" if beyond_seo_available() else "Basic")
+
+    # No-fluff recommendations per focus area (issue/impact/fix shape).
+    recommendations = [_focus_recommendation(f) for f in focus]
+
+    summary = f"{name}: priority focus on {', '.join(focus)} (based on {n} answered questions)."
+    if site_data:
+        summary += (
+            f" Live crawl: {site_data['pages_crawled']} page(s) sampled "
+            f"[{site_data['quality']} data]."
+        )
+    else:
+        summary += " No live site data (Advisory mode) — set APIFY_API_TOKEN for live crawl."
+
     return {
         "business": name,
+        "website": website or "",
         "answered": n,
         "focus_areas": focus,
         "departments": depts,
+        "mode": mode,
+        "site_data": site_data,
+        "recommendations": recommendations,
         "generated_at": datetime.utcnow().isoformat(),
-        "summary": f"{name}: priority focus on {', '.join(focus)} (based on {n} answered questions).",
+        "summary": summary,
+    }
+
+
+# Concrete, no-fluff next-action per focus area (Beyond SEO style: not generic).
+_FOCUS_ACTIONS = {
+    "Reputation / Review Generation": "Set up a review-request flow (post-service SMS/email) and respond to every Google review within 24h; measure: new reviews/month + avg rating.",
+    "SEO Strategy": "Build topical service+location pages mapped to buyer intent; measure: indexed pages and non-brand clicks in Search Console.",
+    "Web / UX": "Fix mobile Core Web Vitals (LCP/CLS) and add clear CTAs above the fold; measure: CWV pass rate + form/call conversion.",
+    "Paid Media": "Start with high-intent local search ads on top 5 money keywords with call tracking; measure: cost per qualified lead.",
+    "Competitive Analysis": "Map top 3 competitors' ranking pages and backlink sources; measure: keyword gap closed per month.",
+    "General Local SEO": "Optimize Google Business Profile (categories, services, photos, posts) and NAP consistency; measure: GBP calls/direction requests.",
+}
+
+
+def _focus_recommendation(focus_label):
+    return {
+        "area": focus_label,
+        "action": _FOCUS_ACTIONS.get(focus_label, _FOCUS_ACTIONS["General Local SEO"]),
+        "priority": "High",
     }
 
 
@@ -464,4 +649,6 @@ def integration_status(db=None):
         "google_oauth": google_enabled(),
         "twilio": twilio_enabled(db),
         "scheduler": _scheduler is not None,
+        "beyond_seo_brain": beyond_seo_available(),
+        "apify": apify_enabled(),
     }

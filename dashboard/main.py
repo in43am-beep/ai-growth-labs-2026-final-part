@@ -4376,7 +4376,7 @@ async def voice_call_message(call_id: int, request: Request):
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=contents,
-            config={"system_instruction": VOICE_AGENT_PERSONA, "max_output_tokens": 512}
+            config={"system_instruction": integrations.ai_system_prompt(VOICE_AGENT_PERSONA), "max_output_tokens": 512}
         )
         ai_response = response.text
 
@@ -4590,7 +4590,7 @@ async def chat_message(request: Request):
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=contents,
-            config={"system_instruction": CHATBOT_PERSONA, "max_output_tokens": 512}
+            config={"system_instruction": integrations.ai_system_prompt(CHATBOT_PERSONA), "max_output_tokens": 512}
         )
         ai_response = response.text
     except Exception:
@@ -4700,6 +4700,13 @@ async def submit_seo_questionnaire(request: Request):
     answers = data.get("answers", {})
     comments = data.get("comments", "")
     source = data.get("source", "client_portal")
+    # Website is used (when Apify is configured) for a live crawl in the report.
+    website = data.get("website", "") or data.get("site_url", "")
+    if not website and isinstance(answers, dict):
+        for k, v in answers.items():
+            if isinstance(v, str) and ("http" in v.lower() or "www." in v.lower()) and "website" in k.lower():
+                website = v.strip()
+                break
 
     db = get_db()
 
@@ -4750,7 +4757,7 @@ async def submit_seo_questionnaire(request: Request):
     # department dashboards (in-app notifications + stored report).
     report = None
     try:
-        report = integrations.analyze_questionnaire(answers, business_name, client_name)
+        report = integrations.analyze_questionnaire(answers, business_name, client_name, website=website)
         integrations.route_questionnaire_report(db, questionnaire_id, report)
     except Exception as e:
         print(f"[questionnaire auto-report] {e}")
